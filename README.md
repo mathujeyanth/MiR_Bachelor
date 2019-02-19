@@ -2,5 +2,5 @@
 
 # QoL commands
 Unity
-train: mlagents-learn config/trainer_config.yaml --run-id=firstRun --train
+train: mlagents-learn config/trainer_config.yaml --run-id=firstRun --train \n
 tensorboard: tensorboard --logdir=summaries
