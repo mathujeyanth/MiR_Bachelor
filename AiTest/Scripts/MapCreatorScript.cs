@@ -95,7 +95,7 @@ public class MapCreatorScript : MonoBehaviour
             for (int j = 0;j< GamesOnColumns;j++)
             {
                 // The position to be instantiated at is based on the coordinates.
-                Vector3 position = new Vector3((xCoord / 20)+ (j * (columns+10)) / 20, (yCoord / 20)+ (i * (rows+10)) / 20, 0f);
+                Vector3 position = new Vector3((xCoord / 20)+ (j * (columns*1.1f)) / 20, (yCoord / 20)+ (i * (rows*1.1f)) / 20, 0f);
 
                 // Create an instance of the prefab from the random index of the array.
                 GameObject tileInstance = Instantiate(prefabs, position, Quaternion.identity) as GameObject;
@@ -113,7 +113,7 @@ public class MapCreatorScript : MonoBehaviour
             for (int j = 0; j < GamesOnColumns; j++)
             {
                 GameObject agent = new GameObject("Agent" + i + j);
-                Vector3 position = new Vector3((j * (columns + 10) / 20) + ((columns + 10) / 2) / 20, (i * (rows + 10) / 20) + ((rows + 10) / 2) / 20, 0f);
+                Vector3 position = new Vector3((j * (columns *1.1f) / 20) + ((columns *1.1f) / 2) / 20, (i * (rows *1.1f) / 20) + ((rows *1.1f) / 2) / 20, 0f);
                 GameObject agents = Instantiate(Agents, position, Quaternion.identity) as GameObject;
                 agents.transform.parent = agent.transform;
             }
