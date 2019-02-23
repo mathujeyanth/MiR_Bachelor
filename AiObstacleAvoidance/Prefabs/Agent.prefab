@@ -37,8 +37,8 @@ GameObject:
   - component: {fileID: 212591969209419752}
   - component: {fileID: 50423716037170550}
   - component: {fileID: 61435818898593206}
-  - component: {fileID: 58249328165354186}
   - component: {fileID: 114160761989941792}
+  - component: {fileID: 58441340125094268}
   m_Layer: 0
   m_Name: robot
   m_TagString: Untagged
@@ -93,7 +93,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!58 &58249328165354186
+--- !u!58 &58441340125094268
 CircleCollider2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -102,7 +102,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}

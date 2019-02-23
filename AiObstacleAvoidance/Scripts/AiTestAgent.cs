@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
+using System;
 using MLAgents;
 
 public class AiTestAgent : Agent
@@ -9,6 +11,9 @@ public class AiTestAgent : Agent
     public bool useVectorObs = true;
     public bool displayLidar = false;
     public Vector2[] path;
+
+    private Vector2[][] pathArray;
+    private System.Random rnd = new System.Random();
 
     private int pathIdx;
     private Vector2 currentPos;
@@ -22,6 +27,11 @@ public class AiTestAgent : Agent
 
     private float moveHorizontal = 0;
     private float moveVertical = 0;
+
+    private float targetHoizontal = 0;
+    private float targetVertical = 0;
+
+    private float drag = 0.95f;
 
     private float lastDistance;
 
@@ -45,6 +55,7 @@ public class AiTestAgent : Agent
         academy = FindObjectOfType<AiTestAcademy>(); 
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
+        ReadCSVFile();
         AgentReset();
     }
 
@@ -95,39 +106,67 @@ public class AiTestAgent : Agent
         CalcReward();
     }
 
+    //void FixedUpdate()
+    //{
+    //    if (targetVertical != 0)
+    //    {
+    //        if (virtualLinearVelocity < targetVertical * (1 - Mathf.Abs(virtualAngularVelocity)))
+    //        {
+    //            virtualLinearVelocity += linearMaxAcceleration * 0.1f;
+    //        }
+    //        else
+    //            virtualLinearVelocity -= linearMaxAcceleration * 0.1f;
+    //    }
+    //    else
+    //    {
+    //        // Drag
+    //        virtualLinearVelocity = virtualLinearVelocity * drag;
+    //    }
+
+    //    if (targetHoizontal != 0)
+    //    {
+    //        if (virtualAngularVelocity < targetHoizontal)
+    //        {
+    //            virtualAngularVelocity += angularMaxAcceleration * 0.1f;
+    //        }
+    //        else
+    //        {
+    //            virtualAngularVelocity -= angularMaxAcceleration * 0.1f;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        // Drag
+    //        virtualAngularVelocity = virtualAngularVelocity * drag;
+    //    }
+
+    //    // Set velocities
+    //    agentRB.angularVelocity = virtualAngularVelocity * -Mathf.Rad2Deg;
+
+    //    agentRB.velocity = new Vector2
+    //    (
+    //        virtualLinearVelocity * Mathf.Sin(-agentRB.rotation * Mathf.Deg2Rad), // x
+    //        virtualLinearVelocity * Mathf.Cos(-agentRB.rotation * Mathf.Deg2Rad)  // y
+    //    );
+    //}
+
     public void MoveAgent(float[] act)
     {
-        // Player input
-        moveHorizontal = Mathf.Clamp(act[0], -1.0f, 1.0f);
-        moveVertical = Mathf.Clamp(act[1], -1.0f, 1.0f);
+        // AI input
+        moveHorizontal = Mathf.Clamp(act[0], -angularVelocityLimit, angularVelocityLimit);
+        moveVertical = Mathf.Clamp(act[1], linearReverseVelocityLimit, linearVelocityLimit);
 
-        //if (moveHorizontal != 0.0f && moveVertical != 0.0f)
-        //{
-        //    moveHorizontal = moveHorizontal * 0.5f;
-        //    moveVertical = moveVertical * 0.5f;
-        //}
+        if (moveHorizontal != 0)
+        {
+            targetHoizontal = moveHorizontal;
+        }
+            
 
-        // Linear- and angularvelocity calculation
-        virtualAngularVelocity += angularMaxAcceleration * moveHorizontal * 0.1f * 1.1f;//Time.fixedDeltaTime;
-        virtualLinearVelocity += linearMaxAcceleration * moveVertical * 0.1f * 1.1f;//Time.fixedDeltaTime;
-
-        // Speed limits
-        virtualAngularVelocity = Mathf.Clamp(virtualAngularVelocity, -angularVelocityLimit * (1 - Mathf.Abs(moveVertical)), angularVelocityLimit * (1 - Mathf.Abs(moveVertical)));
-        virtualLinearVelocity = Mathf.Clamp(virtualLinearVelocity, linearReverseVelocityLimit * (1 - Mathf.Abs(moveHorizontal)), linearVelocityLimit * (1 - Mathf.Abs(moveHorizontal)));
-
-        // Drag
-
-        virtualAngularVelocity = virtualAngularVelocity * 0.95f;
-        virtualLinearVelocity = virtualLinearVelocity * 0.95f;
-
-        // Anuglar and linear acceleration
-        agentRB.angularVelocity = virtualAngularVelocity * -57.29579f;
-
-        agentRB.velocity = new Vector2
-        (
-            virtualLinearVelocity * Mathf.Sin(-agentRB.rotation * radians), // x
-            virtualLinearVelocity * Mathf.Cos(-agentRB.rotation * radians)  // y
-        );
+        if (moveVertical != 0)
+        {
+            targetVertical = moveVertical;
+        }
+            
     }
 
     public void CalcReward()
@@ -166,9 +205,7 @@ public class AiTestAgent : Agent
                 if (currentDistance <0.2f)
                 {
                     AddReward(5000f);
-                    //Done();
-                    pathIdx = 4;
-                    nextPos = path[pathIdx];
+                    Done();
                 }
             }
             else
@@ -182,11 +219,12 @@ public class AiTestAgent : Agent
 
     public override void AgentReset()
     {
+        path = pathArray[rnd.Next(200)];
         pathIdx = 1;
         currentPos = path[0];
         nextPos = path[pathIdx];
         agentRB.transform.localPosition = currentPos;
-        agentRB.rotation = -90; // getTargetAngle(nextPos);
+        agentRB.rotation = Vector2.SignedAngle(simpleVec, currentPos - nextPos); // getTargetAngle(nextPos);
         agentRB.velocity = new Vector2(0.0f, 0.0f);
         agentRB.angularVelocity = 0.0f;
         lastDistance = Vector2.Distance(currentPos, nextPos);
@@ -194,13 +232,13 @@ public class AiTestAgent : Agent
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        AddReward(-1000f);
+        AddReward(-10000f);
         Done();
     }
 
     void OnTriggerEnter2D(Collider2D col) // OnTriggerEnter2D
     {
-        AddReward(-100f);
+        AddReward(-1000f);
     }
     
     float getTargetAngle(Vector2 point)
@@ -215,6 +253,45 @@ public class AiTestAgent : Agent
             rotation = rotation + 360;
 
         return rotation;
+    }
+
+    void ReadCSVFile()
+    {
+        pathArray = new Vector2[200][];
+     
+        StreamReader strReader = new StreamReader("Assets/ML-Agents/Examples/AiObstacleAvoidance/Resources/pathes.csv");
+        bool endOfFile = false;
+        int index = 0;
+        while (!endOfFile)
+        {
+            string data_string = strReader.ReadLine();
+            if (data_string == null)
+            {
+                endOfFile = true;
+                break;
+            }
+            string[] data_values = data_string.Split(',');
+            string[] ting;
+
+            Vector2[] paths = new Vector2[data_values.Length / 2];
+
+            float f1 = 0.0f;
+            float f2 = 0.0f;
+
+            for (int i = 0;i<data_values.Length/20;i++)
+            {
+                ting = data_values[i * 20].Split('.');
+                f1 = Single.Parse(ting[0]) + Single.Parse(ting[1].Remove(4)) / Mathf.Pow(10, 4);
+
+                ting = data_values[(i * 20)+1].Split('.');
+                f2 = Single.Parse(ting[0]) + (Single.Parse(ting[1].Remove(4)) / Mathf.Pow(10, 4));
+
+                paths[i] = new Vector2(f1,f2);
+            }
+            //Debug.Log(data_values[0]);
+            pathArray[index] = paths;
+            index++;
+        }
     }
 
 }

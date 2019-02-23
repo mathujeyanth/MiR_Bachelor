@@ -224,9 +224,9 @@ MonoBehaviour:
   wallTiles: {fileID: 8114859752756935614, guid: 5d8782976481ed24da0008aa9bfe95d1,
     type: 2}
   Agents: {fileID: 1514300048946310, guid: 4d3ae299b701f5c4e981f81d2f87f59f, type: 2}
-  GamesOnRows: 2
-  GamesOnColumns: 4
-  map: {fileID: 2800000, guid: 80059fc3b39e1a746b13b5960799d297, type: 3}
+  GamesOnRows: 1
+  GamesOnColumns: 1
+  map: {fileID: 2800000, guid: fe89273c5b3e08f4aace12dc737b9238, type: 3}
 --- !u!4 &534023215
 Transform:
   m_ObjectHideFlags: 0
