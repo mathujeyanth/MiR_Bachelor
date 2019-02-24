@@ -188,7 +188,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 67713592}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 12, y: 12, z: -100}
+  m_LocalPosition: {x: 20, y: 12, z: -100}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -224,8 +224,8 @@ MonoBehaviour:
   wallTiles: {fileID: 8114859752756935614, guid: 5d8782976481ed24da0008aa9bfe95d1,
     type: 2}
   Agents: {fileID: 1514300048946310, guid: 4d3ae299b701f5c4e981f81d2f87f59f, type: 2}
-  GamesOnRows: 1
-  GamesOnColumns: 1
+  GamesOnRows: 2
+  GamesOnColumns: 4
   map: {fileID: 2800000, guid: fe89273c5b3e08f4aace12dc737b9238, type: 3}
 --- !u!4 &534023215
 Transform:

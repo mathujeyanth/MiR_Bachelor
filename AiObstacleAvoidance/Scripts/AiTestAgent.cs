@@ -7,9 +7,10 @@ using MLAgents;
 
 public class AiTestAgent : Agent
 {
-    public float laserDist = 20;
+    public float laserDist = 10;
     public bool useVectorObs = true;
     public bool displayLidar = false;
+    public bool spawnObstacle = false;
     public Vector2[] path;
 
     private Vector2[][] pathArray;
@@ -46,17 +47,29 @@ public class AiTestAgent : Agent
 
     private RaycastHit2D hit;
 
+    public GameObject obstacle;
+
     private Rigidbody2D agentRB;
     private AiTestAcademy academy;
+    private GameObject square;
+    private bool isSpawned = false;
 
     public override void InitializeAgent()
     {
+        if (spawnObstacle)
+        {
+            square = Instantiate(obstacle, new Vector2(0.0f, 0.0f), Quaternion.identity) as GameObject;
+            isSpawned = true;
+        }
+            
         base.InitializeAgent();
         academy = FindObjectOfType<AiTestAcademy>(); 
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
         ReadCSVFile();
         AgentReset();
+        //for (int i = 0; i < pathArray[0].Length; i++)
+        //    Debug.Log(pathArray[0][i]);
     }
 
 
@@ -74,6 +87,7 @@ public class AiTestAgent : Agent
             for (int i = 0; i < nLaser; i++)
             {
                 hit = Physics2D.Raycast(transform.position + offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * radians), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * radians))), laserDist, bitMask);
+
                 if (displayLidar && hit)
                     Debug.DrawRay(transform.position + offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * radians), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * radians))), Color.blue);
 
@@ -81,11 +95,9 @@ public class AiTestAgent : Agent
                     AddVectorObs(hit.distance);
                 else
                     AddVectorObs(laserDist);
-
             }
 
             offset = new Vector2(0.531f * Mathf.Sin((146.91f - agentRB.rotation) * radians), 0.531f * Mathf.Cos((146.91f - agentRB.rotation) * radians));
-
             for (int i = 0; i < nLaser; i++)
             {
                 hit = Physics2D.Raycast(transform.position + offset, (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * radians), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * radians))), laserDist, bitMask);
@@ -106,49 +118,49 @@ public class AiTestAgent : Agent
         CalcReward();
     }
 
-    //void FixedUpdate()
-    //{
-    //    if (targetVertical != 0)
-    //    {
-    //        if (virtualLinearVelocity < targetVertical * (1 - Mathf.Abs(virtualAngularVelocity)))
-    //        {
-    //            virtualLinearVelocity += linearMaxAcceleration * 0.1f;
-    //        }
-    //        else
-    //            virtualLinearVelocity -= linearMaxAcceleration * 0.1f;
-    //    }
-    //    else
-    //    {
-    //        // Drag
-    //        virtualLinearVelocity = virtualLinearVelocity * drag;
-    //    }
+    void FixedUpdate()
+    {
+        if (targetVertical != 0)
+        {
+            if (virtualLinearVelocity < targetVertical * (1 - Mathf.Abs(virtualAngularVelocity)))
+            {
+                virtualLinearVelocity += linearMaxAcceleration * 0.1f;
+            }
+            else
+                virtualLinearVelocity -= linearMaxAcceleration * 0.1f;
+        }
+        else
+        {
+            // Drag
+            virtualLinearVelocity = virtualLinearVelocity * drag;
+        }
 
-    //    if (targetHoizontal != 0)
-    //    {
-    //        if (virtualAngularVelocity < targetHoizontal)
-    //        {
-    //            virtualAngularVelocity += angularMaxAcceleration * 0.1f;
-    //        }
-    //        else
-    //        {
-    //            virtualAngularVelocity -= angularMaxAcceleration * 0.1f;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        // Drag
-    //        virtualAngularVelocity = virtualAngularVelocity * drag;
-    //    }
+        if (targetHoizontal != 0)
+        {
+            if (virtualAngularVelocity < targetHoizontal)
+            {
+                virtualAngularVelocity += angularMaxAcceleration * Math.Abs(targetHoizontal) * 0.1f;
+            }
+            else
+            {
+                virtualAngularVelocity -= angularMaxAcceleration * Math.Abs(targetHoizontal) * 0.1f;
+            }
+        }
+        else
+        {
+            // Drag
+            virtualAngularVelocity = virtualAngularVelocity * drag;
+        }
 
-    //    // Set velocities
-    //    agentRB.angularVelocity = virtualAngularVelocity * -Mathf.Rad2Deg;
+        // Set velocities
+        agentRB.angularVelocity = virtualAngularVelocity * -Mathf.Rad2Deg;
 
-    //    agentRB.velocity = new Vector2
-    //    (
-    //        virtualLinearVelocity * Mathf.Sin(-agentRB.rotation * Mathf.Deg2Rad), // x
-    //        virtualLinearVelocity * Mathf.Cos(-agentRB.rotation * Mathf.Deg2Rad)  // y
-    //    );
-    //}
+        agentRB.velocity = new Vector2
+        (
+            virtualLinearVelocity * Mathf.Sin(-agentRB.rotation * Mathf.Deg2Rad), // x
+            virtualLinearVelocity * Mathf.Cos(-agentRB.rotation * Mathf.Deg2Rad)  // y
+        );
+    }
 
     public void MoveAgent(float[] act)
     {
@@ -171,7 +183,7 @@ public class AiTestAgent : Agent
 
     public void CalcReward()
     {
-        AddReward(-0.1f);
+        AddReward(-0.01f);
 
         float nextDistance = Vector2.Distance(agentRB.transform.localPosition, nextPos);
         float distBetweenPos = Vector2.Distance(currentPos, nextPos);
@@ -179,19 +191,19 @@ public class AiTestAgent : Agent
 
         if (currentDistance < lastDistance)
         {
-            AddReward(1f);
+            AddReward(0.02f);
             lastDistance = currentDistance;
         }
 
         if (Mathf.Abs(getTargetAngle(currentPos)) < 5 )
-            AddReward(1f);
+            AddReward(0.01f);
 
-        if (Mathf.Abs(getTargetAngle(nextPos)) < 5)
-            AddReward(0.5f);
+        if (Mathf.Abs(getTargetAngle(nextPos)) < 15)
+            AddReward(0.01f);
 
-        if (currentDistance > lastDistance + 1)
+        if (currentDistance > lastDistance + 2)
         {
-            AddReward(-1000f);
+            AddReward(-1f);
             Done();
         }
             
@@ -204,14 +216,14 @@ public class AiTestAgent : Agent
             {
                 if (currentDistance <0.2f)
                 {
-                    AddReward(5000f);
+                    AddReward(1f);
                     Done();
                 }
             }
             else
             {
                 nextPos = path[pathIdx];
-                AddReward(pathIdx * 100f);
+                AddReward(0.2f);
             }
             lastDistance = Vector2.Distance(agentRB.transform.localPosition, currentPos);
         }
@@ -219,27 +231,46 @@ public class AiTestAgent : Agent
 
     public override void AgentReset()
     {
-        path = pathArray[rnd.Next(200)];
+        int pathNr = rnd.Next(200);
+        path = pathArray[pathNr];
+        if (isSpawned)
+        {
+            int squarePlace = rnd.Next(1,path.Length-1);
+            square.transform.position = (Vector2)transform.parent.position + path[squarePlace];
+        }
+        //Debug.Log(pathNr+" "+gameObject.name);
+        for (int i = 0; i < path.Length - 1; i++)
+        {
+            Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red, 10f);
+        }
+
         pathIdx = 1;
         currentPos = path[0];
         nextPos = path[pathIdx];
         agentRB.transform.localPosition = currentPos;
-        agentRB.rotation = Vector2.SignedAngle(simpleVec, currentPos - nextPos); // getTargetAngle(nextPos);
+        agentRB.rotation = Vector2.SignedAngle(simpleVec, nextPos - currentPos); // getTargetAngle(nextPos);
+        
+        lastDistance = Vector2.Distance(currentPos, nextPos);
+
         agentRB.velocity = new Vector2(0.0f, 0.0f);
         agentRB.angularVelocity = 0.0f;
-        lastDistance = Vector2.Distance(currentPos, nextPos);
+
+        virtualLinearVelocity = 0.0f;
+        virtualAngularVelocity = 0.0f;
+        targetVertical = 0.0f;
+        targetHoizontal = 0.0f;
     }
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        AddReward(-10000f);
+        AddReward(-1f);
         Done();
     }
 
-    void OnTriggerEnter2D(Collider2D col) // OnTriggerEnter2D
-    {
-        AddReward(-1000f);
-    }
+    //void OnTriggerEnter2D(Collider2D col) // OnTriggerEnter2D
+    //{
+    //    AddReward(-100f);
+    //}
     
     float getTargetAngle(Vector2 point)
     {
@@ -273,17 +304,17 @@ public class AiTestAgent : Agent
             string[] data_values = data_string.Split(',');
             string[] ting;
 
-            Vector2[] paths = new Vector2[data_values.Length / 2];
+            Vector2[] paths = new Vector2[data_values.Length / 150];
 
             float f1 = 0.0f;
             float f2 = 0.0f;
 
-            for (int i = 0;i<data_values.Length/20;i++)
+            for (int i = 0;i<data_values.Length/150;i++)
             {
-                ting = data_values[i * 20].Split('.');
+                ting = data_values[i * 150].Split('.');
                 f1 = Single.Parse(ting[0]) + Single.Parse(ting[1].Remove(4)) / Mathf.Pow(10, 4);
 
-                ting = data_values[(i * 20)+1].Split('.');
+                ting = data_values[(i * 150)+1].Split('.');
                 f2 = Single.Parse(ting[0]) + (Single.Parse(ting[1].Remove(4)) / Mathf.Pow(10, 4));
 
                 paths[i] = new Vector2(f1,f2);
