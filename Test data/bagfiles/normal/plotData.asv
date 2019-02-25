@@ -233,7 +233,7 @@ thetaFront = varTemp.readScanAngles;
 theta=-thetaFront-thetaFront(1);
 
 %%
-clear xFront yFront xBack yBack
+
 
 for i=1:504
     [xFront(i,:),yFront(i,:)] = pol2cart(theta',vecFront(i,:));
