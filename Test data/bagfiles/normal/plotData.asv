@@ -1,117 +1,27 @@
 close all;
 clc;
-clear;
+%clear;
+
+%% Import of data
+tic %Timing of section - Start timer
 
 normalBag = rosbag('simplePath_2.bag');
-backScan = select (normalBag,'Topic','b_scan');
-
-
 
 normalBag.AvailableTopics
 
-%normalBag.MessageList
+normalBag.MessageList
 
-bagselect_bscan= select(normalBag, 'Topic', '/b_scan')
+bagselect_bscan= select(normalBag, 'Topic', '/b_scan');
+bagselect_fscan= select(normalBag,'Topic', '/f_scan');
 
 msgs = readMessages(normalBag);
 
-ranges = msgs{1,1}.Ranges;
-angles=msgs{1,1}.readScanAngles;
-plot(msgs{1,1})
-
-%%
-for i=1:15
-    msgs{i,1}.MessageType
-end
 
 
-%% Simple sammen plot af front og back
-% for i=1:length(msgs)
-%     if strcmp(msgs{i,1}.MessageType, 'sensor_msgs/LaserScan')
-%          if strcmp(msgs{i,1}.Header.FrameId, 'back_laser_link')
-%             figure(1)
-%             plot(msgs{i,1})
-%             title('Back scan - Lidar')
-%             pause(5/1000)
-%          end
-%          if strcmp(msgs{i,1}.Header.FrameId, 'front_laser_link')
-%             figure(2)
-%             plot(msgs{i,1})
-%             title('Front laser - Lidar')
-%             pause(5/1000)
-%          end
-%     end
-% end
-
-
-
-%%
-back_laser=0;
-
-for i=1:length(msgs)
-    if strcmp(msgs{i,1}.MessageType, 'sensor_msgs/LaserScan')
-        if strcmp(msgs{i,1}.Header.FrameId, 'back_laser_link')
-            back_laser=back_laser+1;
-        end
-    end
-end
-
-front_laser=0;
-
-for i=1:length(msgs)
-    if strcmp(msgs{i,1}.MessageType, 'sensor_msgs/LaserScan')
-        if strcmp(msgs{i,1}.Header.FrameId, 'front_laser_link')
-            front_laser=front_laser+1;
-        end
-    end
-end
-
-%% Type of transform
-for i=18:44
-    if strcmp(msgs{i,1}.MessageType, 'tf2_msgs/TFMessage')
-        disp(':::')
-        disp(i)
-        disp(msgs{i,1}.Transforms.ChildFrameId)
-        disp('---')
-    end
-end
-
-%% Print out front_laser_link
-for i=18:200
-    if strcmp(msgs{i,1}.MessageType, 'tf2_msgs/TFMessage')
-        if strcmp(msgs{i,1}.Transforms.ChildFrameId, 'back_laser_link')
-            disp(':::')
-            disp('XYZ')
-            disp(i)
-            disp(msgs{i,1}.Transforms.Transform.Translation.X)
-            disp(msgs{i,1}.Transforms.Transform.Translation.Y)
-            disp(msgs{i,1}.Transforms.Transform.Translation.Z)
-            disp('---')
-            break;
-        end
-    end
-end
-
-%% Plot data manuelt
-LaserScan_index=0;
-for i=1:length(msgs)
-    if strcmp(msgs{i,1}.MessageType, 'sensor_msgs/LaserScan')
-        LaserScan_index=i;
-        break;
-    end
-end
-
-thetaFront=msgs{LaserScan_index,1}.AngleMin:msgs{LaserScan_index,1}.AngleIncrement:msgs{LaserScan_index,1}.AngleMax;
-
-rangesFront=transpose(msgs{1,1}.Ranges);
-
-[frontX,frontY]=pol2cart(thetaFront,rangesFront);
-figure(1)
-scatter(frontY,frontX);
-axis([-25 25 -25 25]);
-
-
-%% Beregning af off-set
+disp('Time for section: "Import of data"')
+toc %Timing of section - Stop timer
+%% Calculating off-set
+tic %Timing of section - Start timer
 
 for i=1:length(msgs)
     if strcmp(msgs{i,1}.MessageType, 'tf2_msgs/TFMessage')
@@ -138,7 +48,9 @@ for i=1:length(msgs)
     end
 end
 
-%% Korrekt sammen plot
+disp('Time for section: "Calculating off-set"')
+toc %Timing of section - Stop timer
+%% Correct plotting of backScan and frontScan in same plot
 
 varTemp=msgs{6,1};
 thetaFront = varTemp.readScanAngles;
@@ -204,7 +116,8 @@ hold off
 % figure(202);polarplot(-thetaBack-thetaBack(1),-rangeBack,'.');
 % hold on;polarplot(-thetaFront-thetaFront(1),rangeFront,'.');hold off;
 
-%% Flyt data over til 2 vectorer
+%% Move of data into 2 vectors
+tic %Timing of section - Start timer
 
 index_front=1;
 index_back=1;
@@ -225,17 +138,19 @@ for i=1:length(msgs)
     end
 end
 
-
-%% Plot af front og back med korrekt off-set
+disp('Time for section: "Move of data into 2 vectors"')
+toc %Timing of section - Stop timer
+%% Applying off-set
+tic %Timing of section - Start timer
 
 varTemp=msgs{6,1};
 thetaFront = varTemp.readScanAngles;
 theta=-thetaFront-thetaFront(1);
 
-%%
+% Apply off-set
+clear xFront yFront xBack yBack
 
-
-for i=1:504
+for i=1:min(length(vecFront),length(vecBack))
     [xFront(i,:),yFront(i,:)] = pol2cart(theta',vecFront(i,:));
     xFront(i,:)= xFront(i,:)-FrontLidarPosition(1);
     yFront(i,:)= yFront(i,:)+FrontLidarPosition(2);
@@ -245,7 +160,10 @@ for i=1:504
     yBack(i,:)= yBack(i,:)+BackLidarPosition(2);
 end
 
-%%
+disp('Time for section:"Plot of front and back with correct off-set"')
+toc %Timing of section - Stop timer
+%% Removal of invalid data
+tic %Timing of section - Start timer
 for i=1:504
     for j=1:length(theta)
         if vecFront(i,j) >= 25 || vecFront(i,j) == 0
@@ -259,7 +177,10 @@ for i=1:504
     end
 end
 
-%%
+disp('Time for section:"Removal of invalid data"')
+toc %Timing of section - Stop timer
+%% Plot of front and back with correct off-set
+tic %Timing of section - Start timer
 for i=1:504
     figure(1)
     
@@ -271,3 +192,5 @@ for i=1:504
     disp(i)
     pause(50/1000)
 end
+disp('Time for section:"Plot of front and back with correct off-set"')
+toc %Timing of section - Stop timer
