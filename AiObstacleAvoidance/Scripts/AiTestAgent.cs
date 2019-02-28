@@ -198,14 +198,14 @@ public class AiTestAgent : Agent
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
         }
 
-        if (distToIndex > 4.0f)
+        if (distToIndex > 5.0f)
         {
             Done();
             AddReward(-0.5f);
         }
 
         if (lastIndex < pathIdx)
-            AddReward(0.025f * (pathIdx-lastIndex));
+            AddReward(0.025f * (pathIdx-lastIndex) );
         else
             AddReward(-0.001f);
 
@@ -234,8 +234,9 @@ public class AiTestAgent : Agent
 
         if (isSpawned)
         {
-            int squarePlace = rnd.Next(1,path.Length-1);
-            square.transform.position = (Vector2)transform.parent.position + path[squarePlace];
+            int squarePlace = rnd.Next(20,path.Length-20);
+            Vector2 squareOffest = new Vector2(0.4f, 0.4f);
+            square.transform.position = (Vector2)transform.parent.position + path[squarePlace] + squareOffest;
         }
         //Debug.Log(pathNr+" "+gameObject.name);
         for (int i = 0; i < path.Length - 1; i++)
@@ -290,7 +291,7 @@ public class AiTestAgent : Agent
     {
         pathArray = new Vector2[200][];
      
-        StreamReader strReader = new StreamReader("Assets/ML-Agents/Examples/AiObstacleAvoidance/Resources/pathes.csv");
+        StreamReader strReader = new StreamReader("pathes.csv");
         bool endOfFile = false;
         int index = 0;
         while (!endOfFile)
