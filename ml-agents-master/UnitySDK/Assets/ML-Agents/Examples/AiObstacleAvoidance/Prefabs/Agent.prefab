@@ -154,7 +154,7 @@ MonoBehaviour:
   laserDist: 20
   useVectorObs: 1
   displayLidar: 0
-  spawnObstacle: 1
+  spawnObstacle: 0
   linearMaxAcceleration: 0.5
   angularMaxAcceleration: 0.5
   linearVelocityLimit: 1.5
