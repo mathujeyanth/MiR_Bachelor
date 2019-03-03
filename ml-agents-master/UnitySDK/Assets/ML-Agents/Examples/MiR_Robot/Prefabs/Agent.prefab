@@ -150,17 +150,17 @@ MonoBehaviour:
     maxStep: 10000
     resetOnDone: 1
     onDemandDecision: 0
-    numberOfActionsBetweenDecisions: 1
+    numberOfActionsBetweenDecisions: 10
   laserDist: 10
   useVectorObs: 1
   displayLidar: 0
-  spawnObstacle: 0
+  spawnObstacle: 1
   linearMaxAcceleration: 0.5
   angularMaxAcceleration: 0.5
   linearVelocityLimit: 1.5
   linearReverseVelocityLimit: -0.5
   angularVelocityLimit: 1
-  obstacle: {fileID: 0}
+  obstacle: {fileID: 1619032266682344, guid: b4e5c94f8c98c10409c8a12b5da54ec4, type: 2}
 --- !u!212 &212658636567366102
 SpriteRenderer:
   m_ObjectHideFlags: 1

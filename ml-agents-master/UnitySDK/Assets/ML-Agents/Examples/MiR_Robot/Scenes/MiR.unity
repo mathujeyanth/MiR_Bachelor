@@ -147,16 +147,16 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 2b8e89aa26d0f7b4e9cecde4a32692cf, type: 2}
   maxSteps: 0
   trainingConfiguration:
-    width: 904
-    height: 498
+    width: 900
+    height: 500
     qualityLevel: 1
-    timeScale: 1
+    timeScale: 10
     targetFrameRate: -1
   inferenceConfiguration:
-    width: 1280
-    height: 720
-    qualityLevel: 5
-    timeScale: 1
+    width: 900
+    height: 500
+    qualityLevel: 1
+    timeScale: 10
     targetFrameRate: 60
   resetParameters:
     resetParameters: []
@@ -202,8 +202,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallTiles: {fileID: 1324564873510644, guid: 79e22135b50f7f7468d7f19f60fb22ed, type: 2}
   Agents: {fileID: 1286372264664168, guid: 82992979d72096b44a1b9f7dea86098a, type: 2}
-  GamesOnRows: 4
-  GamesOnColumns: 4
+  GamesOnRows: 5
+  GamesOnColumns: 5
   map: {fileID: 2800000, guid: 1098872461908fa40aba5291ce8a6a06, type: 3}
 --- !u!4 &714788588
 Transform:
