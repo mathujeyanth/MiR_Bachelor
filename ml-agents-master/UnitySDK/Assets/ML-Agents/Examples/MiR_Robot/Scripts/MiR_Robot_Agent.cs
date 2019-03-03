@@ -21,11 +21,11 @@ public class MiR_Robot_Agent : Agent
     private Vector2 currentPos;
     //private Vector2 nextPos;
     private Vector2 simpleVec;
-    private const int nLaser = 50;
+    private const int nLaser = 60;
     private float[] hitDistances = new float[nLaser];
     private const int bitMask = 1 << 9;
-    private const int frontStart = -120;
-    private const float degreesPrLaser = 240 / nLaser;
+    private const int frontStart = -90;
+    private const float degreesPrLaser = 180 / nLaser;
     private const float radians = Mathf.PI / 180;
 
     private float moveHorizontal = 0;
@@ -45,8 +45,8 @@ public class MiR_Robot_Agent : Agent
     private float virtualLinearVelocity = 0;
     private float virtualAngularVelocity = 0;
 
-    private const int overlap = 2;
-    private const int zones = 5;
+    private const int overlap = 1;
+    private const int zones = 7;
 
     private float[] lidarInput = new float[zones];
 

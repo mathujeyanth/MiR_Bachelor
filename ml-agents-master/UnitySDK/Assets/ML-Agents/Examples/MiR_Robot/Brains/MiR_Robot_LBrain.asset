@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Name: MiR_Robot_LBrain
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 8
-    numStackedVectorObservations: 10
+    vectorObservationSize: 10
+    numStackedVectorObservations: 20
     vectorActionSize: 02000000
     cameraResolutions: []
     vectorActionDescriptions:
