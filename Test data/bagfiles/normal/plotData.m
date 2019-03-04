@@ -5,7 +5,7 @@ clear;
 %% Import of data
 tic %Timing of section - Start timer
 
-normalBag = rosbag('simplePath_2.bag');
+normalBag = rosbag('simplePath_3.bag');
 
 bagselect_bscan= select(normalBag, 'Topic', '/b_scan');
 bagselect_fscan= select(normalBag,'Topic', '/f_scan');
