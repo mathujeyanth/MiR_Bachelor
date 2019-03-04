@@ -38,6 +38,8 @@ sysinfo.txt
 # Training environments
 ./ml-agents-master/envs/
 
+# Builds - like .exe files that are trained on without graphics
+./ml-agents-master/GameBuild/
 
 
 # Builds

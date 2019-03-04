@@ -230,7 +230,7 @@ public class MiR_Robot_Agent : Agent
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
         }
 
-        if (distToIndex > 2.0f)
+        if (distToIndex > 2.0f) //Meters it may deviate from path
         {
             Done();
             AddReward(-0.5f);
