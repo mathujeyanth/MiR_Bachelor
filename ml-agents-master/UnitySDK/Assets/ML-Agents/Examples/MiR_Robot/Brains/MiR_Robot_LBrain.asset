@@ -17,7 +17,7 @@ MonoBehaviour:
     vectorActionSize: 02000000
     cameraResolutions: []
     vectorActionDescriptions:
-    - 
-    - 
+    - Horizontal
+    - Vertical
     vectorActionSpaceType: 1
   model: {fileID: 0}

@@ -49,7 +49,7 @@ public class AiTestAgent : Agent
     public GameObject obstacle;
 
     private Rigidbody2D agentRB;
-    private AiTestAcademy academy;
+    //private AiTestAcademy academy;
     private GameObject square;
     private bool isSpawned = false;
 
@@ -62,7 +62,7 @@ public class AiTestAgent : Agent
         }
             
         base.InitializeAgent();
-        academy = FindObjectOfType<AiTestAcademy>(); 
+        //academy = FindObjectOfType<AiTestAcademy>(); 
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
         ReadCSVFile();

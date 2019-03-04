@@ -49,3 +49,6 @@ sysinfo.txt
 
 # pytest cache 
 *.pytest_cache/
+ml-agents-master/Game/ImitationGame_Data/
+
+ml-agents-master/Game/

@@ -59,6 +59,8 @@ public class MiR_Robot_Agent : Agent
     //private MiR_Robot_Academy academy;
     private GameObject square;
     private bool isSpawned = false;
+    private bool hasntPassed = true;
+    private int squareIdx = 0;
 
     public override void InitializeAgent()
     {
@@ -87,6 +89,7 @@ public class MiR_Robot_Agent : Agent
             AddVectorObs( (virtualLinearVelocity) );
             AddVectorObs(virtualAngularVelocity);
             AddVectorObs( (getTargetAngle(currentPos)/180.0f) );
+
 
             for (int i = 0; i < nLaser; i++)
             {
@@ -193,22 +196,22 @@ public class MiR_Robot_Agent : Agent
         moveHorizontal = Mathf.Clamp(act[0], -1, 1);
         moveVertical = Mathf.Clamp(act[1], -1, 1);
 
-        if (moveHorizontal != 0)
-        {
+        //if (moveHorizontal != 0)
+        //{
             if (Mathf.Abs(moveHorizontal) > 0.1f)
                 targetHoizontal = moveHorizontal * angularVelocityLimit;
             else
                 targetHoizontal = 0.0f; 
-        }
+        //}
 
 
-        if (moveVertical != 0)
-        {
+        //if (moveVertical != 0)
+        //{
             if (moveVertical > 0)
-                targetVertical = moveVertical * linearVelocityLimit;
+                targetVertical = moveVertical * linearVelocityLimit * (1 - Mathf.Abs(moveHorizontal));
             else
-                targetVertical = moveVertical * linearReverseVelocityLimit;
-        }
+                targetVertical = moveVertical * linearReverseVelocityLimit * (1 - Mathf.Abs(moveHorizontal));
+        //}
 
     }
 
@@ -227,10 +230,16 @@ public class MiR_Robot_Agent : Agent
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
         }
 
-        if (distToIndex > 5.0f)
+        if (distToIndex > 2.0f)
         {
             Done();
             AddReward(-0.5f);
+        }
+
+        if (isSpawned && hasntPassed && pathIdx > squareIdx)
+        {
+            hasntPassed = false;
+            AddReward(0.5f);
         }
 
         if (lastIndex < pathIdx)
@@ -264,16 +273,18 @@ public class MiR_Robot_Agent : Agent
         if (isSpawned)
         {
             int squarePlace = rnd.Next(10, path.Length - 10);
-            Vector2 squareOffest = new Vector2(0.5f, 0.5f);
+            Vector2 squareOffest = new Vector2(0.0f, 0.0f);
             square.transform.position = (Vector2)transform.parent.position + path[squarePlace] + squareOffest;
+            squareIdx = squarePlace;
+            hasntPassed = true;
         }
         //Debug.Log(pathNr+" "+gameObject.name);
         for (int i = 0; i < path.Length - 1; i++)
         {
-            Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red, 10f);
+            Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red, path.Length/2);
         }
 
-        pathIdx = 10;
+        pathIdx = 0;
         currentPos = path[20];
         //nextPos = path[41];
         agentRB.transform.localPosition = path[0];

@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 50274768041750180}
   - component: {fileID: 61508600943119750}
   - component: {fileID: 58692386777001346}
+  - component: {fileID: 114433676715951090}
   - component: {fileID: 114537868416751336}
   m_Layer: 0
   m_Name: robot
@@ -133,6 +134,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.58, y: 0.89}
   m_EdgeRadius: 0
+--- !u!114 &114433676715951090
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1155499059373174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50f710d360a49461cad67ff5e6bcefe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  record: 0
+  demonstrationName: Recording
 --- !u!114 &114537868416751336
 MonoBehaviour:
   m_ObjectHideFlags: 1
