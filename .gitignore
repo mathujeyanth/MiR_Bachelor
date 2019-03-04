@@ -23,6 +23,7 @@ ExportedObj/
 *.svd
 *.pdb
 *.opendb
+*.meta
 
 # Unity3D generated meta files
 *.pidb.meta
@@ -34,7 +35,17 @@ sysinfo.txt
 # Unity 
 ./ml-agents-master/models/
 ./ml-agents-master/summaries/
+# Training environments
+./ml-agents-master/envs/
+
+
 
 # Builds
 *.apk
 *.unitypackage
+
+# VSCode hidden files
+*.vscode/
+
+# pytest cache 
+*.pytest_cache/
