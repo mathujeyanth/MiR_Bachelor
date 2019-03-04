@@ -227,7 +227,7 @@ public class MiR_Robot_Agent : Agent
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
         }
 
-        if (distToIndex > 5.0f)
+        if (distToIndex > 2.0f) //Meters it may deviate from path
         {
             Done();
             AddReward(-0.5f);
@@ -273,7 +273,7 @@ public class MiR_Robot_Agent : Agent
             Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red, 10f);
         }
 
-        pathIdx = 10;
+        pathIdx = 0;
         currentPos = path[20];
         //nextPos = path[41];
         agentRB.transform.localPosition = path[0];
