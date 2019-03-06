@@ -2,7 +2,7 @@ default:
     trainer: ppo
     batch_size: 2560
     beta: 5.0e-3
-    buffer_size: 25600
+    buffer_size: 51200
     epsilon: 0.2
     gamma: 0.99
     hidden_units: 256
@@ -12,7 +12,7 @@ default:
     memory_size: 256
     normalize: true
     num_epoch: 10
-    num_layers: 3
+    num_layers: 4
     time_horizon: 64
     sequence_length: 64
     summary_freq: 2500
