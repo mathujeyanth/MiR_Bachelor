@@ -136,6 +136,7 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < zones; i++)
             {
+                lidarInput[i] = Mathf.Floor(lidarInput[i]);
                 lidarInput[i] /= laserDist;
             }
 

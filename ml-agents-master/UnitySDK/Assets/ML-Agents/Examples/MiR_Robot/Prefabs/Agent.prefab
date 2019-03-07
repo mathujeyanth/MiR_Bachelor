@@ -165,7 +165,7 @@ MonoBehaviour:
     resetOnDone: 1
     onDemandDecision: 0
     numberOfActionsBetweenDecisions: 2
-  laserDist: 5
+  laserDist: 10
   useVectorObs: 1
   displayLidar: 0
   displayPath: 0
