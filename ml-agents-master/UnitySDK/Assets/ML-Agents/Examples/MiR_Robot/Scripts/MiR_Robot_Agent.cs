@@ -253,6 +253,9 @@ public class MiR_Robot_Agent : Agent
         else
             AddReward(-0.001f);
 
+        if (virtualLinearVelocity < 0.01f)
+            AddReward(-0.001f);
+
         if (pathIdx > path.Length - 5)
             currentPos = path[path.Length - 1];
         else
