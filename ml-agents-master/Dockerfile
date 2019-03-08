@@ -127,6 +127,8 @@ WORKDIR /ml-agents
 RUN pip install .
 
 # port 5005 is the port used in in Editor training.
+#Expose more ports
 EXPOSE 5005
+EXPOSE 5006
 
 ENTRYPOINT ["mlagents-learn"]
