@@ -154,6 +154,11 @@ public class MiR_Robot_Agent : Agent
             {
                 Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red);
             }
+            //for (int i = 0;i<200;i++)
+            //{
+            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][1], Color.red);
+            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][pathArray[i].Length-2], (Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 1], Color.red);
+            //}
         }
         
     }

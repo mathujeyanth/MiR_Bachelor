@@ -202,9 +202,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallTiles: {fileID: 1324564873510644, guid: 79e22135b50f7f7468d7f19f60fb22ed, type: 2}
   Agents: {fileID: 1286372264664168, guid: 82992979d72096b44a1b9f7dea86098a, type: 2}
-  GamesOnRows: 5
-  GamesOnColumns: 5
-  map: {fileID: 2800000, guid: f51d93250e84c9649aa51c78e0a2bbab, type: 3}
+  GamesOnRows: 3
+  GamesOnColumns: 3
+  map: {fileID: 2800000, guid: dc7d92065df09c445a46718c9902a7c0, type: 3}
 --- !u!4 &714788588
 Transform:
   m_ObjectHideFlags: 0
