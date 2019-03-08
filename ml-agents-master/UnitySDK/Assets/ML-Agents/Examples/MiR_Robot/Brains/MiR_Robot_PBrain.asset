@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: MiR_Robot_PBrain
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 10
+    vectorObservationSize: 11
     numStackedVectorObservations: 20
     vectorActionSize: 02000000
     cameraResolutions: []
@@ -27,5 +27,5 @@ MonoBehaviour:
     scale: 1
   - axis: Vertical
     index: 1
-    scale: 1
+    scale: 2
   discretePlayerActions: []
