@@ -91,7 +91,7 @@ public class MiR_Robot_Agent : Agent
         {
             AddVectorObs( (virtualLinearVelocity-0.5f) );
             AddVectorObs(virtualAngularVelocity);
-            AddVectorObs( (getTargetAngle(currentPos)/180.0f) );
+            AddVectorObs( (Mathf.Floor(getTargetAngle(currentPos))/180.0f) );
             AddVectorObs(Vector2.Distance(agentRB.transform.localPosition, currentPos) / maxDeviation);
 
             for (int i = 0; i < nLaser; i++)
@@ -258,13 +258,13 @@ public class MiR_Robot_Agent : Agent
         else
             AddReward(-0.001f);
 
-        if (virtualLinearVelocity < 0.01f)
-            AddReward(-0.001f);
+        if (virtualLinearVelocity <= 0)
+            AddReward(-0.005f);
 
-        if (pathIdx > path.Length - 5)
+        if (pathIdx > path.Length - 11)
             currentPos = path[path.Length - 1];
         else
-            currentPos = path[pathIdx + 4];
+            currentPos = path[pathIdx + 10];
 
         if (isSpawned && hasntPassed && pathIdx > (squareIdx + 1))
         {
@@ -277,7 +277,7 @@ public class MiR_Robot_Agent : Agent
         //else
         //    nextPos = path[pathIdx + 20];
 
-        if (distanceToGoal < 0.5f)
+        if (distanceToGoal < 1)
         {
             Done();
             AddReward(1f);
@@ -301,10 +301,10 @@ public class MiR_Robot_Agent : Agent
         //Debug.Log(pathNr+" "+gameObject.name);
 
         pathIdx = 0;
-        currentPos = path[4];
+        currentPos = path[10];
         //nextPos = path[41];
         agentRB.transform.localPosition = path[0];
-        agentRB.rotation = Vector2.SignedAngle(simpleVec, path[4] - path[0]); // getTargetAngle(nextPos);
+        agentRB.rotation = Vector2.SignedAngle(simpleVec, path[10] - path[0]); // getTargetAngle(nextPos);
 
         agentRB.velocity = new Vector2(0.0f, 0.0f);
         agentRB.angularVelocity = 0.0f;
