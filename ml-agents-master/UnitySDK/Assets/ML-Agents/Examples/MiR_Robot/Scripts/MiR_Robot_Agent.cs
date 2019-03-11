@@ -56,6 +56,8 @@ public class MiR_Robot_Agent : Agent
     private RaycastHit2D hit;
 
     public GameObject obstacle;
+    public TextAsset pathesCSV;
+
 
     private Rigidbody2D agentRB;
     private CircleCollider2D safetyZone;
@@ -156,7 +158,7 @@ public class MiR_Robot_Agent : Agent
             }
             //for (int i = 0; i < 200; i++)
             //{
-            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][1], Color.red);
+            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][4], Color.red);
             //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 2], (Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 1], Color.red);
             //}
         }
@@ -277,7 +279,7 @@ public class MiR_Robot_Agent : Agent
         //else
         //    nextPos = path[pathIdx + 20];
 
-        if (distanceToGoal < 1)
+        if (distanceToGoal < safetyZone.radius)
         {
             Done();
             AddReward(1f);
@@ -346,7 +348,7 @@ public class MiR_Robot_Agent : Agent
     {
         pathArray = new Vector2[200][];
 
-        StreamReader strReader = new StreamReader("pathes.csv");
+        StreamReader strReader = new StreamReader(pathesCSV.text);
         bool endOfFile = false;
         int index = 0;
         while (!endOfFile)

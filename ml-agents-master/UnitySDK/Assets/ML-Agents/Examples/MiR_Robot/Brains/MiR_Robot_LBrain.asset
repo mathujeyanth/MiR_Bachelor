@@ -20,4 +20,4 @@ MonoBehaviour:
     - Horizontal
     - Vertical
     vectorActionSpaceType: 1
-  model: {fileID: 4900000, guid: a2ae874460704784d81635240db8e018, type: 3}
+  model: {fileID: 4900000, guid: 6f95f5649db5b1342be9c1c774b53217, type: 3}
