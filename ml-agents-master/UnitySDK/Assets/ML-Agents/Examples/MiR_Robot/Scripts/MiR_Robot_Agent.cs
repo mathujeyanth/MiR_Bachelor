@@ -347,14 +347,13 @@ public class MiR_Robot_Agent : Agent
     void ReadCSVFile()
     {
         pathArray = new Vector2[200][];
-
-        StreamReader strReader = new StreamReader(pathesCSV.text);
+        string[] allPathsString = pathesCSV.text.Split('\n');
         bool endOfFile = false;
         int index = 0;
         while (!endOfFile)
         {
-            string data_string = strReader.ReadLine();
-            if (data_string == null)
+            string data_string = allPathsString[index];
+            if (index == allPathsString.Length-1)
             {
                 endOfFile = true;
                 break;
