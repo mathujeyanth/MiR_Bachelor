@@ -143,7 +143,8 @@ MonoBehaviour:
   broadcastHub:
     broadcastingBrains:
     - {fileID: 11400000, guid: 2b8e89aa26d0f7b4e9cecde4a32692cf, type: 2}
-    _brainsToControl: []
+    _brainsToControl:
+    - {fileID: 11400000, guid: 2b8e89aa26d0f7b4e9cecde4a32692cf, type: 2}
   maxSteps: 0
   trainingConfiguration:
     width: 900
@@ -201,8 +202,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallTiles: {fileID: 1324564873510644, guid: 79e22135b50f7f7468d7f19f60fb22ed, type: 2}
   Agents: {fileID: 1286372264664168, guid: 82992979d72096b44a1b9f7dea86098a, type: 2}
-  GamesOnRows: 1
-  GamesOnColumns: 1
+  GamesOnRows: 4
+  GamesOnColumns: 4
   map: {fileID: 2800000, guid: e4d02b42d4c39e04397c92bc1b4fcce0, type: 3}
 --- !u!4 &714788588
 Transform:

@@ -46,7 +46,7 @@ public class MiR_Robot_Agent : Agent
     private float virtualLinearVelocity = 0;
     private float virtualAngularVelocity = 0;
 
-    private float maxDeviation = 2.0f;
+    private float maxDeviation = 3.0f;
 
     private const int overlap = 1;
     private const int zones = 7;
@@ -91,7 +91,7 @@ public class MiR_Robot_Agent : Agent
     {
         if (useVectorObs)
         {
-            AddVectorObs( (virtualLinearVelocity-0.5f) );
+            AddVectorObs( (virtualLinearVelocity/linearVelocityLimit) );
             AddVectorObs(virtualAngularVelocity);
             AddVectorObs( (Mathf.Floor(getTargetAngle(currentPos))/180.0f) );
             AddVectorObs(Vector2.Distance(agentRB.transform.localPosition, currentPos) / maxDeviation);
@@ -152,15 +152,15 @@ public class MiR_Robot_Agent : Agent
         CalcReward();
         if (displayPath)
         {
-            for (int i = pathIdx; i < path.Length - 1; i++)
-            {
-                Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red);
-            }
-            //for (int i = 0; i < 200; i++)
+            //for (int i = pathIdx; i < path.Length - 1; i++)
             //{
-            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][4], Color.red);
-            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 5], (Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 1], Color.red);
+            //    Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red);
             //}
+            for (int i = 0; i < 200; i++)
+            {
+                Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][4], Color.red);
+                Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 5], (Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 1], Color.red);
+            }
         }
         
     }
