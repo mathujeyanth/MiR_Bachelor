@@ -1,8 +1,8 @@
 default:
     trainer: ppo
-    batch_size: 2500
+    batch_size: 2024
     beta: 5.0e-3
-    buffer_size: 25000
+    buffer_size: 20240
     epsilon: 0.2
     gamma: 0.99
     hidden_units: 256
@@ -15,7 +15,7 @@ default:
     num_layers: 4
     time_horizon: 64
     sequence_length: 64
-    summary_freq: 2500
+    summary_freq: 4000
     use_recurrent: false
     use_curiosity: false
     curiosity_strength: 0.01

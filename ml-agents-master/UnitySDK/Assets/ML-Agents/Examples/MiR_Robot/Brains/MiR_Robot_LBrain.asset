@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: MiR_Robot_LBrain
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 11
+    vectorObservationSize: 18
     numStackedVectorObservations: 1
     vectorActionSize: 02000000
     cameraResolutions: []
@@ -20,4 +20,4 @@ MonoBehaviour:
     - Horizontal
     - Vertical
     vectorActionSpaceType: 1
-  model: {fileID: 4900000, guid: 6f95f5649db5b1342be9c1c774b53217, type: 3}
+  model: {fileID: 0}

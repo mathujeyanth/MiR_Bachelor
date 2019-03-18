@@ -22,11 +22,13 @@ public class MiR_Robot_Agent : Agent
     private Vector2 currentPos;
     //private Vector2 nextPos;
     private Vector2 simpleVec;
-    private const int nLaser = 60;
+    private const int nLaser = 30;
     private float[] hitDistances = new float[nLaser];
+    private float[] safetyDistances = new float[nLaser];
+
     private const int bitMask = 1 << 9;
-    private const int frontStart = -120;
-    private const float degreesPrLaser = 240 / nLaser;
+    private const int frontStart = -180;
+    private const float degreesPrLaser = 270 / (nLaser-1);
     private const float radians = Mathf.PI / 180;
 
     private float moveHorizontal = 0;
@@ -81,7 +83,26 @@ public class MiR_Robot_Agent : Agent
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
         ReadCSVFile();
-        
+
+        float vinkelB = 33.09f;
+        float lengthB = safetyZone.radius;
+
+        float lengthC = 0.531f;
+
+        for (int i = 0;i<nLaser;i++)
+        {
+            vinkelB = (i * degreesPrLaser) + 33.09f;
+
+            if (vinkelB > 180.0f)
+            {
+                vinkelB = 180.0f - (vinkelB - 180.0f);
+            }
+
+            safetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+
+        }
+
+
         //for (int i = 0; i < pathArray[0].Length; i++)
         //    Debug.Log(pathArray[0][i]);
     }
@@ -93,23 +114,27 @@ public class MiR_Robot_Agent : Agent
         {
             AddVectorObs( (virtualLinearVelocity/linearVelocityLimit) );
             AddVectorObs(virtualAngularVelocity);
-            AddVectorObs( (Mathf.Floor(getTargetAngle(currentPos))/180.0f) );
+            AddVectorObs( (Mathf.Round(getTargetAngle(currentPos)/10.0f)/18.0f) );
             AddVectorObs(Vector2.Distance(agentRB.transform.localPosition, currentPos) / maxDeviation);
+
+            // front lidar
+
+            Vector2 offset = new Vector2(0.531f * Mathf.Sin((-33.09f - agentRB.rotation) * Mathf.Deg2Rad), 0.531f * Mathf.Cos((-33.09f - agentRB.rotation) * Mathf.Deg2Rad));
 
             for (int i = 0; i < nLaser; i++)
             {
-               
-                hit = Physics2D.Raycast(agentRB.position, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist, bitMask);
+
+                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist, bitMask);
 
                 if (displayLidar && hit)
                 {
-                    Debug.DrawRay(agentRB.position, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
-                    Debug.DrawRay(agentRB.position, safetyZone.radius * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                    Debug.DrawRay(agentRB.position + offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
+                    Debug.DrawRay(agentRB.position + offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
                     
 
                 if (hit)
-                    hitDistances[i] = hit.distance-safetyZone.radius;
+                    hitDistances[i] = hit.distance - safetyDistances[i];
                 else
                     hitDistances[i] = laserDist;
             }
@@ -143,6 +168,57 @@ public class MiR_Robot_Agent : Agent
             }
 
             AddVectorObs(lidarInput);
+
+            // Rear lidar
+
+            offset = new Vector2(0.531f * Mathf.Sin((146.91f - agentRB.rotation) * Mathf.Deg2Rad), 0.531f * Mathf.Cos((146.91f - agentRB.rotation) * Mathf.Deg2Rad));
+
+            for (int i = 0; i < nLaser; i++)
+            {
+                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin((((i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist, bitMask);
+
+                if (displayLidar && hit)
+                {
+                    Debug.DrawRay(agentRB.position + offset, hit.distance * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
+                    Debug.DrawRay(agentRB.position + offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                }
+
+
+                if (hit)
+                    hitDistances[i] = hit.distance - safetyDistances[i];
+                else
+                    hitDistances[i] = laserDist;
+            }
+
+            for (int i = 0; i < zones; i++)
+            {
+                lidarInput[i] = laserDist;
+            }
+
+            for (int i = 0; i < ((nLaser / zones) + 2 * overlap); i++)
+            {
+                if (i < ((nLaser / zones) + overlap))
+                {
+                    if (hitDistances[i] < lidarInput[0])
+                        lidarInput[0] = hitDistances[i];
+
+                    if (hitDistances[i + ((nLaser / zones) * (zones - 1) - overlap)] < lidarInput[zones - 1])
+                        lidarInput[zones - 1] = hitDistances[i + ((nLaser / zones) * (zones - 1) - overlap)];
+                }
+                for (int j = 1; j < zones - 1; j++)
+                {
+                    if (hitDistances[i + ((nLaser / zones) * j) - overlap] < lidarInput[j])
+                        lidarInput[j] = hitDistances[i + ((nLaser / zones) * j) - overlap];
+                }
+            }
+
+            for (int i = 0; i < zones; i++)
+            {
+                lidarInput[i] = Mathf.Floor(lidarInput[i]);
+                lidarInput[i] /= laserDist;
+            }
+
+            AddVectorObs(lidarInput);
         }
     }
 
@@ -152,15 +228,15 @@ public class MiR_Robot_Agent : Agent
         CalcReward();
         if (displayPath)
         {
-            //for (int i = pathIdx; i < path.Length - 1; i++)
-            //{
-            //    Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red);
-            //}
-            for (int i = 0; i < 200; i++)
+            for (int i = pathIdx; i < path.Length - 1; i++)
             {
-                Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][4], Color.red);
-                Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 5], (Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 1], Color.red);
+                Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red);
             }
+            //for (int i = 0; i < 200; i++)
+            //{
+            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][4], Color.red);
+            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 5], (Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 1], Color.red);
+            //}
         }
         
     }
