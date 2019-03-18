@@ -17,6 +17,7 @@ public class MiR_Robot_Map : MonoBehaviour
 
     public int GamesOnRows = 1;
     public int GamesOnColumns = 1;
+    public int AgentsPerMap = 1;
 
     public Texture2D map;
 
@@ -114,10 +115,13 @@ public class MiR_Robot_Map : MonoBehaviour
         {
             for (int j = 0; j < GamesOnColumns; j++)
             {
-                GameObject agent = new GameObject("Agent" + i + j);
-                Vector3 position = new Vector3((j * (columns * 1.1f) / 20), (i * (rows * 1.1f) / 20), 0f);
-                GameObject agents = Instantiate(Agents, position, Quaternion.identity) as GameObject;
-                agents.transform.parent = agent.transform;
+                for (int k = 0;k<AgentsPerMap;k++)
+                {
+                    GameObject agent = new GameObject("Agent" + i + j + k);
+                    Vector3 position = new Vector3((j * (columns * 1.1f) / 20), (i * (rows * 1.1f) / 20), 0f);
+                    GameObject agents = Instantiate(Agents, position, Quaternion.identity) as GameObject;
+                    agents.transform.parent = agent.transform;
+                }
             }
         }
 

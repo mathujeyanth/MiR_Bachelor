@@ -164,7 +164,7 @@ MonoBehaviour:
     maxStep: 10000
     resetOnDone: 1
     onDemandDecision: 0
-    numberOfActionsBetweenDecisions: 5
+    numberOfActionsBetweenDecisions: 2
   laserDist: 10
   useVectorObs: 1
   displayLidar: 0

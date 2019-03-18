@@ -26,7 +26,7 @@ public class MiR_Robot_Agent : Agent
     private float[] hitDistances = new float[nLaser];
     private float[] safetyDistances = new float[nLaser];
 
-    private const int bitMask = 1 << 9;
+    //private const int bitMask = 1 << 9;
     private const int frontStart = -180;
     private const float degreesPrLaser = 270 / (nLaser-1);
     private const float radians = Mathf.PI / 180;
@@ -124,7 +124,7 @@ public class MiR_Robot_Agent : Agent
             for (int i = 0; i < nLaser; i++)
             {
 
-                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist, bitMask);
+                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
                 if (displayLidar && hit)
                 {
@@ -175,7 +175,7 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < nLaser; i++)
             {
-                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin((((i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist, bitMask);
+                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin((((i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
                 if (displayLidar && hit)
                 {
@@ -367,6 +367,16 @@ public class MiR_Robot_Agent : Agent
     {
         int pathNr = rnd.Next(200);
         path = pathArray[pathNr];
+
+        RaycastHit2D hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1, transform.forward,0.1f);
+
+        while(hit)
+        {
+            Debug.Log(pathNr);
+            pathNr = rnd.Next(200);
+            path = pathArray[pathNr];
+            hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1, transform.forward, 0.1f);
+        }
 
         if (isSpawned)
         {
