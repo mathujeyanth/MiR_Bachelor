@@ -15,7 +15,7 @@ default:
     num_layers: 4
     time_horizon: 64
     sequence_length: 64
-    summary_freq: 4000
+    summary_freq: 1000
     use_recurrent: false
     use_curiosity: false
     curiosity_strength: 0.01

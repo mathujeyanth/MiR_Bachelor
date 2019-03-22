@@ -13,6 +13,8 @@ public class MiR_Robot_Agent : Agent
     public bool displayPath = false;
     public bool spawnObstacle = false;
 
+    public bool EnableMaxDiv = true;
+
     private Vector2[] path;
 
     private Vector2[][] pathArray;
@@ -22,7 +24,7 @@ public class MiR_Robot_Agent : Agent
     private Vector2 currentPos;
     //private Vector2 nextPos;
     private Vector2 simpleVec;
-    private const int nLaser = 30;
+    private const int nLaser = 40;
     private float[] hitDistances = new float[nLaser];
     private float[] safetyDistances = new float[nLaser];
 
@@ -50,8 +52,8 @@ public class MiR_Robot_Agent : Agent
 
     private float maxDeviation = 3.0f;
 
-    private const int overlap = 1;
-    private const int zones = 7;
+    private const int overlap = 2;
+    private const int zones = 5;
 
     private float[] lidarInput = new float[zones];
 
@@ -214,8 +216,8 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < zones; i++)
             {
-                lidarInput[i] = Mathf.Floor(lidarInput[i]);
-                lidarInput[i] /= laserDist;
+                lidarInput[i] = Mathf.Floor(2*lidarInput[i]);
+                lidarInput[i] /= 2*laserDist;
             }
 
             AddVectorObs(lidarInput);
@@ -325,7 +327,7 @@ public class MiR_Robot_Agent : Agent
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
         }
 
-        if (distToIndex > maxDeviation) //Meters it may deviate from path
+        if (EnableMaxDiv && distToIndex > maxDeviation) //Meters it may deviate from path
         {
             Done();
             AddReward(-1f);
@@ -368,14 +370,14 @@ public class MiR_Robot_Agent : Agent
         int pathNr = rnd.Next(200);
         path = pathArray[pathNr];
 
-        RaycastHit2D hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1, transform.forward,0.1f);
+        RaycastHit2D hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], safetyZone.radius, transform.up,0.1f);
 
         while(hit)
         {
             Debug.Log(pathNr);
             pathNr = rnd.Next(200);
             path = pathArray[pathNr];
-            hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1, transform.forward, 0.1f);
+            hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], safetyZone.radius, transform.up, 0.1f);
         }
 
         if (isSpawned)

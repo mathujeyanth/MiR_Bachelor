@@ -164,12 +164,13 @@ MonoBehaviour:
     maxStep: 10000
     resetOnDone: 1
     onDemandDecision: 0
-    numberOfActionsBetweenDecisions: 2
-  laserDist: 10
+    numberOfActionsBetweenDecisions: 10
+  laserDist: 5
   useVectorObs: 1
   displayLidar: 0
   displayPath: 0
   spawnObstacle: 0
+  EnableMaxDiv: 1
   linearMaxAcceleration: 0.5
   angularMaxAcceleration: 0.5
   linearVelocityLimit: 1.5
