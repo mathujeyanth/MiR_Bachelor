@@ -130,5 +130,7 @@ RUN pip install .
 #Expose more ports
 EXPOSE 5005
 EXPOSE 5006
+EXPOSE 5007
+EXPOSE 5008
 
 ENTRYPOINT ["mlagents-learn"]
