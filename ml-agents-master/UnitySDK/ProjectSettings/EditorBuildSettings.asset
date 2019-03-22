@@ -6,5 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/ML-Agents/Examples/MiR_Robot/Scenes/StackedMaps.unity
+    guid: 201239b98994d3842913569e3309d1f4
+  - enabled: 0
     path: Assets/ML-Agents/Examples/MiR_Robot/Scenes/MiR.unity
     guid: b3752b10953003c4aa73ccd90a739a37

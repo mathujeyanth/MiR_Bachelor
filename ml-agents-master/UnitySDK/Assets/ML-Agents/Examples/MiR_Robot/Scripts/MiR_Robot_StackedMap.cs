@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 
 public class MiR_Robot_StackedMap : MonoBehaviour {
 
@@ -15,9 +15,10 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
     public GameObject Agents;
 
     public int[] AgentsPerMap;
+    private int mapNumber = 0;
 
     public Texture2D[] maps;
-    private int mapLevel = 0;
+    private int addCol = 0;
 
     private GameObject mapObj;
 
@@ -31,7 +32,7 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
     {
         for (int i = 0;i<maps.Length;i++)
         {
-            mapLevel = i;
+            mapNumber = i;
             rows = maps[i].height;
             columns = maps[i].width;
 
@@ -44,6 +45,8 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
             InstantiateTiles();
 
             spawnAgents();
+
+            addCol += Mathf.FloorToInt((columns * 1.1f)/20);
         }
         
     }
@@ -98,7 +101,7 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
     {
 
         // The position to be instantiated at is based on the coordinates.
-        Vector3 position = new Vector3((xCoord / 20) + ((columns * 1.1f)) / 20, (yCoord / 20) + ((rows * 1.1f)) / 20, mapLevel);
+        Vector3 position = new Vector3((xCoord / 20) + addCol, (yCoord / 20));
 
         // Create an instance of the prefab from the random index of the array.
         GameObject tileInstance = Instantiate(prefabs, position, Quaternion.identity) as GameObject;
@@ -109,10 +112,10 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
 
     void spawnAgents()
     {
-        for (int k = 0; k < AgentsPerMap[mapLevel]; k++)
+        for (int k = 0; k < AgentsPerMap[mapNumber]; k++)
         {
             GameObject agent = new GameObject("Agent" + k);
-            Vector3 position = new Vector3(((columns * 1.1f) / 20), ((rows * 1.1f) / 20), mapLevel);
+            Vector3 position = new Vector3(addCol, 0);
             GameObject agents = Instantiate(Agents, position, Quaternion.identity) as GameObject;
             agents.transform.parent = agent.transform;
         }

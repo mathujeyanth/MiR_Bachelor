@@ -121,17 +121,17 @@ public class MiR_Robot_Agent : Agent
 
             // front lidar
 
-            Vector2 offset = new Vector2(0.531f * Mathf.Sin((-33.09f - agentRB.rotation) * Mathf.Deg2Rad), 0.531f * Mathf.Cos((-33.09f - agentRB.rotation) * Mathf.Deg2Rad));
+            Vector3 offset = new Vector2(0.531f * Mathf.Sin((-33.09f - agentRB.rotation) * Mathf.Deg2Rad), 0.531f * Mathf.Cos((-33.09f - agentRB.rotation) * Mathf.Deg2Rad));
 
             for (int i = 0; i < nLaser; i++)
             {
 
-                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
+                hit = Physics2D.Raycast(agentRB.transform.position+offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
                 if (displayLidar && hit)
                 {
-                    Debug.DrawRay(agentRB.position + offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
-                    Debug.DrawRay(agentRB.position + offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                    Debug.DrawRay(agentRB.transform.position+offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
+                    Debug.DrawRay(agentRB.transform.position+offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
                     
 
@@ -177,12 +177,12 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < nLaser; i++)
             {
-                hit = Physics2D.Raycast(agentRB.position + offset, (new Vector2(Mathf.Sin((((i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
+                hit = Physics2D.Raycast(agentRB.transform.position + offset, (new Vector2(Mathf.Sin((((i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
                 if (displayLidar && hit)
                 {
-                    Debug.DrawRay(agentRB.position + offset, hit.distance * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
-                    Debug.DrawRay(agentRB.position + offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                    Debug.DrawRay(agentRB.transform.position + offset, hit.distance * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
+                    Debug.DrawRay(agentRB.transform.position + offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
 
 
