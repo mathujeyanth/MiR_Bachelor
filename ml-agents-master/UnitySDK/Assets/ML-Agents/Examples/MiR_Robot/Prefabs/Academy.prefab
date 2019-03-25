@@ -58,10 +58,10 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 2b8e89aa26d0f7b4e9cecde4a32692cf, type: 2}
   maxSteps: 0
   trainingConfiguration:
-    width: 900
+    width: 1000
     height: 500
     qualityLevel: 1
-    timeScale: 10
+    timeScale: 20
     targetFrameRate: -1
   inferenceConfiguration:
     width: 900

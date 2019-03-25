@@ -7,11 +7,10 @@ using System;
 
 public class MiR_Robot_Agent : Agent
 {
-    public float laserDist = 10;
+    public float laserDist = 5;
     public bool useVectorObs = true;
     public bool displayLidar = false;
     public bool displayPath = false;
-    public bool spawnObstacle = false;
 
     public bool EnableMaxDiv = true;
 
@@ -41,6 +40,8 @@ public class MiR_Robot_Agent : Agent
 
     private float drag = 0.95f;
 
+    private int descionFreq;
+
     public float linearMaxAcceleration = 0.5f;
     public float angularMaxAcceleration = 0.5f;
     public float linearVelocityLimit = 1.5f;
@@ -52,39 +53,34 @@ public class MiR_Robot_Agent : Agent
 
     private float maxDeviation = 3.0f;
 
-    private const int overlap = 2;
-    private const int zones = 5;
+    private const int overlap = 1;
+    private const int zones = 8;
 
     private float[] lidarInput = new float[zones];
+
+    private ContactFilter2D touchFilter;
 
     private RaycastHit2D hit;
 
     public GameObject obstacle;
     public TextAsset pathesCSV;
 
-
     private Rigidbody2D agentRB;
     private CircleCollider2D safetyZone;
-    //private MiR_Robot_Academy academy;
-    private GameObject square;
-    private bool isSpawned = false;
-    private bool hasntPassed = true;
-    private int squareIdx = 0;
 
     public override void InitializeAgent()
     {
-        if (spawnObstacle)
-        {
-            square = Instantiate(obstacle, new Vector2(0.0f, 0.0f), Quaternion.identity) as GameObject;
-            isSpawned = true;
-        }
-
         base.InitializeAgent();
         //academy = FindObjectOfType<MiR_Robot_Academy>();
         safetyZone = GetComponent<CircleCollider2D>();
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
         ReadCSVFile();
+
+        touchFilter.minDepth = 0;
+        touchFilter.maxDepth = 0;
+        touchFilter.ClearLayerMask();
+        touchFilter.ClearNormalAngle();
 
         float vinkelB = 33.09f;
         float lengthB = safetyZone.radius;
@@ -104,9 +100,7 @@ public class MiR_Robot_Agent : Agent
 
         }
 
-
-        //for (int i = 0; i < pathArray[0].Length; i++)
-        //    Debug.Log(pathArray[0][i]);
+        descionFreq = agentParameters.numberOfActionsBetweenDecisions;
     }
 
 
@@ -117,7 +111,8 @@ public class MiR_Robot_Agent : Agent
             AddVectorObs( (virtualLinearVelocity/linearVelocityLimit) );
             AddVectorObs(virtualAngularVelocity);
             AddVectorObs( (Mathf.Round(getTargetAngle(currentPos)/10.0f)/18.0f) );
-            AddVectorObs(Vector2.Distance(agentRB.transform.localPosition, currentPos) / maxDeviation);
+            float dist = Vector2.Distance(currentPos, path[pathIdx]);
+            AddVectorObs((Vector2.Distance(agentRB.transform.localPosition, path[pathIdx])+dist) / (maxDeviation+dist));
 
             // front lidar
 
@@ -165,8 +160,8 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < zones; i++)
             {
-                lidarInput[i] = Mathf.Floor(lidarInput[i]);
-                lidarInput[i] /= laserDist;
+                lidarInput[i] = Mathf.Floor(10*lidarInput[i]);
+                lidarInput[i] /= 10*laserDist;
             }
 
             AddVectorObs(lidarInput);
@@ -216,8 +211,8 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < zones; i++)
             {
-                lidarInput[i] = Mathf.Floor(2*lidarInput[i]);
-                lidarInput[i] /= 2*laserDist;
+                lidarInput[i] = Mathf.Floor(10*lidarInput[i]);
+                lidarInput[i] /= 10*laserDist;
             }
 
             AddVectorObs(lidarInput);
@@ -330,27 +325,26 @@ public class MiR_Robot_Agent : Agent
         if (EnableMaxDiv && distToIndex > maxDeviation) //Meters it may deviate from path
         {
             Done();
-            AddReward(-1f);
+            AddReward(-0.5f);
         }
 
         if (lastIndex < pathIdx)
-            AddReward(0.050f);
+            AddReward(0.02f);
         else
-            AddReward(-0.001f);
+            AddReward(-0.00002f * descionFreq);
 
-        if (virtualLinearVelocity <= 0)
-            AddReward(-0.005f);
+        if (safetyZone.IsTouching(touchFilter))
+        {
+            AddReward(-0.001f * descionFreq);
+        }
 
-        if (pathIdx > path.Length - 11)
+        //if (virtualLinearVelocity <= 0)
+        //    AddReward(-0.0005f * descionFreq);
+
+        if (pathIdx > path.Length - 6)
             currentPos = path[path.Length - 1];
         else
-            currentPos = path[pathIdx + 10];
-
-        if (isSpawned && hasntPassed && pathIdx > (squareIdx + 1))
-        {
-            hasntPassed = false;
-            AddReward(1f);
-        }
+            currentPos = path[pathIdx + 5];
 
         //if (pathIdx > path.Length - 21)
         //    nextPos = path[path.Length - 1];
@@ -370,31 +364,22 @@ public class MiR_Robot_Agent : Agent
         int pathNr = rnd.Next(200);
         path = pathArray[pathNr];
 
-        RaycastHit2D hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], safetyZone.radius, transform.up,0.1f);
+        RaycastHit2D hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1.5f, transform.up,0.1f);
 
         while(hit)
         {
-            Debug.Log(pathNr);
+            //Debug.Log(pathNr);
             pathNr = rnd.Next(200);
             path = pathArray[pathNr];
-            hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], safetyZone.radius, transform.up, 0.1f);
+            hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1.5f, transform.up, 0.1f);
         }
 
-        if (isSpawned)
-        {
-            int squarePlace = rnd.Next(10, path.Length - 10);
-            Vector2 squareOffest = new Vector2(0.0f, 0.0f);
-            square.transform.position = (Vector2)transform.parent.position + path[squarePlace] + squareOffest;
-            squareIdx = squarePlace;
-            hasntPassed = true;
-        }
         //Debug.Log(pathNr+" "+gameObject.name);
 
         pathIdx = 0;
-        currentPos = path[10];
-        //nextPos = path[41];
+        currentPos = path[5];
         agentRB.transform.localPosition = path[0];
-        agentRB.rotation = Vector2.SignedAngle(simpleVec, path[10] - path[0]); // getTargetAngle(nextPos);
+        agentRB.rotation = Vector2.SignedAngle(simpleVec, path[5] - path[0]); // getTargetAngle(nextPos);
 
         agentRB.velocity = new Vector2(0.0f, 0.0f);
         agentRB.angularVelocity = 0.0f;
@@ -407,15 +392,15 @@ public class MiR_Robot_Agent : Agent
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        AddReward(-1f);
+        AddReward(-0.5f);
         Done();
     }
 
-    void OnTriggerEnter2D(Collider2D col) // OnTriggerEnter2D
-    {
+    //void OnTriggerStay2D(Collider2D col) // OnTriggerEnter2D
+    //{
 
-        AddReward(-0.1f);
-    }
+    //    AddReward(-0.001f);
+    //}
 
 
     float getTargetAngle(Vector2 point)

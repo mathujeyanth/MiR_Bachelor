@@ -169,7 +169,6 @@ MonoBehaviour:
   useVectorObs: 1
   displayLidar: 0
   displayPath: 0
-  spawnObstacle: 0
   EnableMaxDiv: 1
   linearMaxAcceleration: 0.5
   angularMaxAcceleration: 0.5
