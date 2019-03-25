@@ -42,6 +42,8 @@ public class MiR_Robot_Agent : Agent
 
     private int descionFreq;
 
+    private int triggers = 0;
+
     public float linearMaxAcceleration = 0.5f;
     public float angularMaxAcceleration = 0.5f;
     public float linearVelocityLimit = 1.5f;
@@ -57,8 +59,6 @@ public class MiR_Robot_Agent : Agent
     private const int zones = 8;
 
     private float[] lidarInput = new float[zones];
-
-    private ContactFilter2D touchFilter;
 
     private RaycastHit2D hit;
 
@@ -76,11 +76,6 @@ public class MiR_Robot_Agent : Agent
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
         ReadCSVFile();
-
-        touchFilter.minDepth = 0;
-        touchFilter.maxDepth = 0;
-        touchFilter.ClearLayerMask();
-        touchFilter.ClearNormalAngle();
 
         float vinkelB = 33.09f;
         float lengthB = safetyZone.radius;
@@ -333,9 +328,9 @@ public class MiR_Robot_Agent : Agent
         else
             AddReward(-0.00002f * descionFreq);
 
-        if (safetyZone.IsTouching(touchFilter))
+        if (triggers > 0)
         {
-            AddReward(-0.001f * descionFreq);
+            AddReward(-0.0001f * descionFreq);
         }
 
         //if (virtualLinearVelocity <= 0)
@@ -388,6 +383,8 @@ public class MiR_Robot_Agent : Agent
         virtualAngularVelocity = 0.0f;
         targetVertical = 0.0f;
         targetHoizontal = 0.0f;
+
+        triggers = 0;
     }
 
     void OnCollisionEnter2D(Collision2D col)
@@ -396,11 +393,15 @@ public class MiR_Robot_Agent : Agent
         Done();
     }
 
-    //void OnTriggerStay2D(Collider2D col) // OnTriggerEnter2D
-    //{
-
-    //    AddReward(-0.001f);
-    //}
+    void OnTriggerEnter2D(Collider2D col) // OnTriggerEnter2D
+    {
+        triggers++;
+    }
+    
+    void OnTriggerExit2D(Collider2D col)
+    {
+        triggers--;
+    }
 
 
     float getTargetAngle(Vector2 point)
