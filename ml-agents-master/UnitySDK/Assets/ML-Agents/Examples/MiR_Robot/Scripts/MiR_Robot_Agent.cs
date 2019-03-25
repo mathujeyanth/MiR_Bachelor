@@ -53,7 +53,7 @@ public class MiR_Robot_Agent : Agent
     private float virtualLinearVelocity = 0;
     private float virtualAngularVelocity = 0;
 
-    private float maxDeviation = 3.0f;
+    private float maxDeviation = 1.0f;
 
     private const int overlap = 1;
     private const int zones = 8;
@@ -319,18 +319,18 @@ public class MiR_Robot_Agent : Agent
 
         if (EnableMaxDiv && distToIndex > maxDeviation) //Meters it may deviate from path
         {
-            Done();
-            AddReward(-0.5f);
+            //Done();
+            AddReward(-0.01f);
         }
 
         if (lastIndex < pathIdx)
             AddReward(0.02f);
-        else
-            AddReward(-0.00002f * descionFreq);
+        
+        AddReward(-0.00002f * descionFreq);
 
         if (triggers > 0)
         {
-            AddReward(-0.0001f * descionFreq);
+            AddReward(-0.001f * descionFreq);
         }
 
         //if (virtualLinearVelocity <= 0)
@@ -359,14 +359,18 @@ public class MiR_Robot_Agent : Agent
         int pathNr = rnd.Next(200);
         path = pathArray[pathNr];
 
-        RaycastHit2D hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1.5f, transform.up,0.1f);
+        //RaycastHit2D hitUp = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, transform.up,0.1f);
+        //RaycastHit2D hitDown = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, -1*transform.up, 0.1f);
+        RaycastHit2D hit = Physics2D.CircleCast(transform.parent.position + (Vector3)path[0] + new Vector3(0,0,-1), 1f, transform.forward, 2f);
 
-        while(hit)
+        while (hit)
         {
             //Debug.Log(pathNr);
             pathNr = rnd.Next(200);
             path = pathArray[pathNr];
-            hit = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1.5f, transform.up, 0.1f);
+            hit = Physics2D.CircleCast(transform.parent.position + (Vector3)path[0] + new Vector3(0, 0, -1), 1f, transform.forward, 2f);
+            //hitUp = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, transform.up, 0.1f);
+            //hitDown = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, -1 * transform.up, 0.1f);
         }
 
         //Debug.Log(pathNr+" "+gameObject.name);
@@ -389,8 +393,8 @@ public class MiR_Robot_Agent : Agent
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        AddReward(-0.5f);
-        Done();
+        AddReward(-1f);
+        //Done();
     }
 
     void OnTriggerEnter2D(Collider2D col) // OnTriggerEnter2D
