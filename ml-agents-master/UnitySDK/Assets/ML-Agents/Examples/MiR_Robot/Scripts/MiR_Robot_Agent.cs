@@ -62,7 +62,6 @@ public class MiR_Robot_Agent : Agent
 
     private RaycastHit2D hit;
 
-    public GameObject obstacle;
     public TextAsset pathesCSV;
 
     private Rigidbody2D agentRB;
@@ -71,7 +70,6 @@ public class MiR_Robot_Agent : Agent
     public override void InitializeAgent()
     {
         base.InitializeAgent();
-        //academy = FindObjectOfType<MiR_Robot_Academy>();
         safetyZone = GetComponent<CircleCollider2D>();
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
@@ -361,14 +359,14 @@ public class MiR_Robot_Agent : Agent
 
         //RaycastHit2D hitUp = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, transform.up,0.1f);
         //RaycastHit2D hitDown = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, -1*transform.up, 0.1f);
-        RaycastHit2D hit = Physics2D.CircleCast(transform.parent.position + (Vector3)path[0] + new Vector3(0,0,-1), 1f, transform.forward, 2f);
+        RaycastHit2D hit = Physics2D.CircleCast(transform.parent.position + (Vector3)path[0] + new Vector3(0,0,1), 1f, transform.forward, 2f);
 
         while (hit)
         {
             //Debug.Log(pathNr);
             pathNr = rnd.Next(200);
             path = pathArray[pathNr];
-            hit = Physics2D.CircleCast(transform.parent.position + (Vector3)path[0] + new Vector3(0, 0, -1), 1f, transform.forward, 2f);
+            hit = Physics2D.CircleCast(transform.parent.position + (Vector3)path[0] + new Vector3(0, 0, 1), 1f, transform.forward, 2f);
             //hitUp = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, transform.up, 0.1f);
             //hitDown = Physics2D.CircleCast((Vector2)transform.parent.position + path[0], 1f, -1 * transform.up, 0.1f);
         }
