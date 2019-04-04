@@ -100,13 +100,14 @@ public class MiR_Robot_Agent : Agent
     public override void CollectObservations()
     {
         if (useVectorObs)
-        {
+        {   
             AddVectorObs( (virtualLinearVelocity/linearVelocityLimit) );
             AddVectorObs(virtualAngularVelocity);
             AddVectorObs( (Mathf.Round(getTargetAngle(currentPos)/10.0f)/18.0f) );
             float dist = Vector2.Distance(currentPos, path[pathIdx]);
+            //Debug.Log(dist);
             AddVectorObs((Vector2.Distance(agentRB.transform.localPosition, path[pathIdx])+dist) / (maxDeviation+dist));
-
+            //Debug.Log(Vector2.Distance(agentRB.transform.localPosition, path[pathIdx]) + dist);
             // front lidar
 
             Vector3 offset = new Vector2(0.531f * Mathf.Sin((-33.09f - agentRB.rotation) * Mathf.Deg2Rad), 0.531f * Mathf.Cos((-33.09f - agentRB.rotation) * Mathf.Deg2Rad));
