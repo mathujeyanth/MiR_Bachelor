@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import numpy as np
 import rospy
+import predictor
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry, Path
-from math import atan2, sqrt, pi, cos
-
+from math import atan2, sqrt, pi, cos 
 def odom_callback(data):
     global linear_speed
     global angular_speed
@@ -140,13 +140,16 @@ def update_rob_pos():
 
 
 def move():
+    #Tensorflow stuff
+    pred=Preditions("MiR_Robot_LBrain.pb")
+    #pred.getPrediction(self, epsilonValues, inputValues)
     # calc safety distances
     global safetyDistances
     vinkelB = 33.09
     lengthB = 0.6
     lengthC = 0.531
     safetyDistances = np.zeros(541)
-    degreesPrLaser = 270/(541-1)
+    degreesPrLaser = 270.0/(541-1)
     for i in range(0,541):
         vinkelB = (i * degreesPrLaser) + 33.09
         if vinkelB > 180.0:
