@@ -2,49 +2,45 @@
 import numpy as np
 import rospy
 import predictor
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Pose
 from sensor_msgs.msg import LaserScan
-from nav_msgs.msg import Odometry, Path
+from nav_msgs.msg import Odometry, Path, MapMetaData
 from math import atan2, sqrt, pi, cos 
+
 def odom_callback(data):
     global linear_speed
     global angular_speed
-    global x_pose
-    global y_pose
-    global angle
     linear_speed = (data.twist.twist.linear.x)
     angular_speed = (data.twist.twist.angular.z)
-    x_pose = data.pose.pose.position.x
-    y_pose = data.pose.pose.position.y
 
-    q = data.pose.pose.orientation
-    siny_cosp = 2*(q.w * q.z)
-    cosy_cosp = 1-2*(q.z*q.z)
-    angle = atan2(siny_cosp, cosy_cosp)
+   
 
 def f_lidar_callback(data):
     global f_lidar
-    f_lidar = lidarToZones(np.flip(data))
+    f_lidar = lidarToZones(np.flip(data.ranges))
+    #print("F lidar")
+    #print(f_lidar.tolist())
 
 
 def b_lidar_callback(data):
     global b_lidar
-    b_lidar = lidarToZones(data)
+    b_lidar = lidarToZones(np.flip(data.ranges))
+    #print("B lidar")
+    #print(b_lidar.tolist())
 
 def lidarToZones(data):
-    hits = np.zeros(len(data.ranges))
+    hits = np.zeros(len(data))
 
     overlap = 13
     zones = 8
-
     for x in range(0,541):
 
-        lidarRange = data.ranges[x]
+        lidarRange = data[x]
 
         if lidarRange > 5 or lidarRange < 0.1:
             hits[x]=1
         else:
-            hits[x]=(lidarRange-safetyDistances[x])/5
+            hits[x]=round(((lidarRange-safetyDistances[x])/5),2)
 
     lidarInput = np.ones(zones)
 
@@ -68,9 +64,6 @@ def path_callback(data):
     global glo_path
     global path_index
     global running
-    global offset_x
-    global offset_y
-    global offset_angle
     global x_pose
     global y_pose
 
@@ -79,25 +72,37 @@ def path_callback(data):
     length_a = len(data.poses)
 
     if length_a > 0:
-        print("New path")
+        #print("New path")
+        
         running = True
         glo_path = np.zeros((2,length_a))
         for x in reversed(range(0,length_a)):
             glo_path[0,x] = data.poses[x].pose.position.x
             glo_path[1,x] = data.poses[x].pose.position.y
         #np.flip(glo_path,0)
+        #print(glo_path)
         index = 0
-        while glo_path[0,0] == glo_path[0,index]:
+        while glo_path[0,0] == glo_path[0,index] or glo_path[1,0] == glo_path[1,index]:
             index +=1
-        path_index = index
+        #path_index = index
         v1 = np.array([glo_path[0,0],glo_path[1,0]])
         v2 = np.array([glo_path[0,index],glo_path[1,index]])
         v3 = v1 - v2
         simple = np.array([0,1])
-        offset_angle = angle_between(simple,v3)
-        offset_x = glo_path[0,0] - x_pose
-        offset_y = glo_path[1,0] - y_pose
 
+def robot_pose_callback(data):
+    #print(data.position)
+    global x_pose
+    global y_pose
+    global angle
+
+    x_pose = data.position.x
+    y_pose = data.position.y
+
+    q = data.orientation
+    siny_cosp = 2*(q.w * q.z)
+    cosy_cosp = 1-2*(q.z*q.z)
+    angle = atan2(siny_cosp, cosy_cosp)
 
 
 def unit_vector(vector):
@@ -106,109 +111,171 @@ def unit_vector(vector):
 def angle_between(v1, v2):
     v1_u=unit_vector(v1)
     v2_u=unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u,v2_u),-1.0,1.0))
+    return atan2(v1_u[0]*v2_u[1]-v1_u[1]*v2_u[0],v1_u[0]*v2_u[0]+v1_u[1]*v2_u[1]) #np.arccos(np.clip(np.dot(v1_u,v2_u),-1.0,1.0)) #a = atan2(v1_u[0]*v2_u[1]-v1_u[1]*v2_u[0],v1_u[0]*v2_u[0]+v1_u[1]*v2_u[1])
 
 def update_rob_pos():
+    global running
     global robot_angle
     global path_index
     global glo_path
     global x_pose
     global y_pose
     global angle
-    global offset_x
-    global offset_y
 
-    rob_x = (x_pose + offset_x)
-    rob_y = (y_pose + offset_y)
+    rob_x = x_pose
+    rob_y = y_pose
 
-    if (glo_path.size/2) != 0 and (glo_path.size/2) > path_index+8:
-        print(path_index)
+    if (glo_path.size/2) != 0 and (glo_path.size/2) > path_index+21:
+        #print(path_index)
         d1 = sqrt((glo_path[0,path_index]       -rob_x)**2+(glo_path[1,path_index]      -rob_y)**2)
         d2 = sqrt((glo_path[0,(path_index+1)]   -rob_x)**2+(glo_path[1,(path_index+1)]  -rob_y)**2)
-        print(d1)
-        print(d2)
-        while d1 >= d2 and (glo_path.size/2) > path_index+2:
+
+        while d1 >= d2 and (glo_path.size/2) > path_index+21:
             path_index = path_index + 1
             d1 = d2
             d2 = sqrt((glo_path[0,path_index+1]-rob_x)**2+(glo_path[1,path_index+1]-rob_y)**2)
 
-        v1 = np.array([glo_path[0,path_index+4],glo_path[1,path_index+4]])
+        v1 = np.array([glo_path[0,path_index+20],glo_path[1,path_index+20]])
         v2 = np.array([rob_x,rob_y])
         v3 = v1 - v2
-        simple = np.array([0,1])
-        robot_angle = -1* angle_between(simple,v3)
+        simple = np.array([1,0])
+        robot_angle = angle_between(simple,v3)
+    else:
+        d = sqrt((glo_path[0,len(glo_path)-1]       -rob_x)**2+(glo_path[1,len(glo_path)-1]      -rob_y)**2)
+        if d < 2:
+            running = False
+        v1 = np.array([glo_path[0,len(glo_path)-1],glo_path[1,len(glo_path)-1]])
+        v2 = np.array([rob_x,rob_y])
+        v3 = v1 - v2
+        simple = np.array([1,0])
+        robot_angle = angle_between(simple,v3)
 
 
 def move():
+    # output to file
+    #f = open('recording.txt','w')
     #Tensorflow stuff
-    pred=Preditions("MiR_Robot_LBrain.pb")
-    #pred.getPrediction(self, epsilonValues, inputValues)
+    pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
     global safetyDistances
     vinkelB = 33.09
-    lengthB = 0.6
-    lengthC = 0.531
+    lengthB = 0.7
+    lengthC = 0.5
     safetyDistances = np.zeros(541)
     degreesPrLaser = 270.0/(541-1)
     for i in range(0,541):
         vinkelB = (i * degreesPrLaser) + 33.09
         if vinkelB > 180.0:
-            vinkelB = 180.0 - vinkelB - 180.0
+            vinkelB = 180.0 - (vinkelB - 180.0)
         safetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
         #safetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
 
     # Starts a new node
     rospy.init_node('MiR_controller', anonymous=True)
-    velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+
+    rospos_sub = rospy.Subscriber("/robot_pose",Pose,robot_pose_callback)
     b_laserScan_sub = rospy.Subscriber("/b_scan", LaserScan, b_lidar_callback)  ## len(data.ranges)
     f_laserScan_sub = rospy.Subscriber("/f_scan", LaserScan, f_lidar_callback)
+
+    rate = rospy.Rate(5)
+    rate.sleep()
+
+    velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
     odom_sub = rospy.Subscriber("/odom",Odometry,odom_callback)
     plan_sub = rospy.Subscriber("/move_base_node/global_plan",Path,path_callback)
+    
     vel_msg = Twist()
 
     #Receiveing the user's input
-    print("Let's move your robot")
+    #print("Let's move your robot")
 
-    rate = rospy.Rate(10)
+    time_frame_1 = np.zeros(20)
+    time_frame_1.tolist()
+
+    time_frame_2 = np.zeros(20)
+    time_frame_2.tolist()
+
+    time_frame_3 = np.zeros(20)
+    time_frame_3.tolist()
+
+    time_frame_4 = np.zeros(20)
+    time_frame_4.tolist()
+    
+    time_frame_5 = np.zeros(20)
+    time_frame_5.tolist()
+
+    key = bool(input("Start?"))
 
     while not rospy.is_shutdown():
         rate.sleep()
+        #print(f_lidar)
+        #print(b_lidar)
+        
         if running:
             update_rob_pos()
-            newAngle = angle - robot_angle
-            if newAngle < -pi:
-                newAngle += 2*pi
-            elif newAngle > pi:
-                newAngle -= 2*pi
-            newAngle += offset_angle
-            if newAngle < -pi:
-                newAngle += 2*pi
-            elif newAngle > pi:
-                newAngle -= 2*pi
-            #print(newAngle)
+            #print("Robot angle and angle to position")
+            #print(angle - robot_angle)
+            angle_dif = (angle - robot_angle)
+            if angle_dif > pi:
+                angle_dif = angle_dif - 2 * pi
+            elif angle_dif < -pi:
+                angle_dif = angle_dif + 2 * pi
 
 
-#        speed = float(input("Input your speed:"))
-#        angular = float(input("Input your angular speed:"))
-#        vel_msg.linear.x = speed
-#        vel_msg.linear.y = 0
-#        vel_msg.linear.z = 0
-#        vel_msg.angular.x = 0
-#        vel_msg.angular.y = 0
-#        vel_msg.angular.z = angular
-#        timer = 0
-#        while timer < 10:
-#            velocity_publisher.publish(vel_msg)
-#            rate.sleep()
-#            timer = timer + 1
+            input_array = ([round(linear_speed,2)*2,round(angular_speed,2)*2, round((angle_dif/pi),2),1])            
+            input_array.extend(f_lidar.tolist())
+            input_array.extend(b_lidar.tolist())
 
-#        vel_msg.linear.x = 0
-#        vel_msg.linear.y = 0
-#        vel_msg.linear.z = 0
-#        vel_msg.angular.x = 0
-#        vel_msg.angular.y = 0
-#        vel_msg.angular.z = 0
-#        velocity_publisher.publish(vel_msg)
+            #our_string = " ".join(str(e) for e in input_array)
+            #f.write(our_string)
+            #f.write('\n')
+
+            time_frame_5 = time_frame_4
+            time_frame_4 = time_frame_3
+            time_frame_3 = time_frame_2
+            time_frame_2 = time_frame_1
+            time_frame_1 = input_array
+            
+            #input_tensor.clear()
+
+            input_tensor = np.array([time_frame_1,time_frame_2,time_frame_3,time_frame_4,time_frame_5])
+            input_tensor = input_tensor.flatten()
+
+            output_tensor = np.array([0,0])
+            eps = np.array([0.2,0.2])
+            output_tensor = pred.getPrediction([eps], [input_tensor])
+
+            linear_vel = output_tensor[0][1] * 0.5
+            if linear_vel < 0:
+                linear_vel = linear_vel * (1/3)
+            angular_vel = output_tensor[0][0] * 0.5
+            
+
+            if abs(angular_vel) < 0.05:
+                angular_vel = 0
+
+            print("Input array")
+            print(input_array)
+            #print("Angle dif")
+            #print(angle_dif)
+
+            vel_msg.linear.x = linear_vel
+            vel_msg.linear.y = 0
+            vel_msg.linear.z = 0
+            vel_msg.angular.x = 0
+            vel_msg.angular.y = 0
+            vel_msg.angular.z = angular_vel
+            velocity_publisher.publish(vel_msg)
+        else:
+            #f.close()
+            vel_msg.linear.x = 0
+            vel_msg.linear.y = 0
+            vel_msg.linear.z = 0
+            vel_msg.angular.x = 0
+            vel_msg.angular.y = 0
+            vel_msg.angular.z = 0
+            velocity_publisher.publish(vel_msg)
+
 
 
 if __name__ == '__main__':

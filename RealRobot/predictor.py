@@ -24,5 +24,5 @@ class Predictions:
 
     def getPrediction(self, epsilonValues, inputValues):
         y_out = self.sess.run(self.outputs, feed_dict={self.eps: epsilonValues, self.inputs: inputValues})
-        print(y_out)
+        #print(y_out)
         return y_out
