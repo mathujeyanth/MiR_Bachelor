@@ -25,7 +25,8 @@ public class MiR_Robot_Agent : Agent
     private Vector2 simpleVec;
     private const int nLaser = 40;
     private float[] hitDistances = new float[nLaser];
-    private float[] safetyDistances = new float[nLaser];
+    private float[] FrontsafetyDistances = new float[nLaser];
+    private float[] BacksafetyDistances = new float[nLaser];
 
     //private const int bitMask = 1 << 9;
     private const int frontStart = -180;
@@ -75,21 +76,37 @@ public class MiR_Robot_Agent : Agent
         simpleVec = new Vector2(0f, 1f);
         ReadCSVFile();
 
-        float vinkelB = 33.09f;
         float lengthB = safetyZone.radius;
 
-        float lengthC = 0.531f;
+        float vinkelB = 30.7f;
+        float lengthC = 0.4594f;
 
         for (int i = 0;i<nLaser;i++)
         {
-            vinkelB = (i * degreesPrLaser) + 33.09f;
+            vinkelB = (i * degreesPrLaser) + 30.7f;
 
             if (vinkelB > 180.0f)
             {
                 vinkelB = 180.0f - (vinkelB - 180.0f);
             }
 
-            safetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+            FrontsafetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+
+        }
+
+        vinkelB = 30.96f;
+        lengthC = 0.4558f;
+
+        for (int i = 0; i < nLaser; i++)
+        {
+            vinkelB = (i * degreesPrLaser) + 30.96f;
+
+            if (vinkelB > 180.0f)
+            {
+                vinkelB = 180.0f - (vinkelB - 180.0f);
+            }
+
+            BacksafetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
 
         }
 
@@ -101,16 +118,15 @@ public class MiR_Robot_Agent : Agent
     {
         if (useVectorObs)
         {   
-            AddVectorObs( (virtualLinearVelocity/linearVelocityLimit) );
-            AddVectorObs(virtualAngularVelocity);
-            AddVectorObs( (Mathf.Round(getTargetAngle(currentPos)/10.0f)/18.0f) );
-            float dist = Vector2.Distance(currentPos, path[pathIdx]);
-            //Debug.Log(dist);
-            AddVectorObs((Vector2.Distance(agentRB.transform.localPosition, path[pathIdx])+dist) / (maxDeviation+dist));
-            //Debug.Log(Vector2.Distance(agentRB.transform.localPosition, path[pathIdx]) + dist);
+            AddVectorObs( roundDec(virtualLinearVelocity/linearVelocityLimit,2) );
+            
+            AddVectorObs( roundDec(virtualAngularVelocity,2));
+            AddVectorObs( roundDec(getTargetAngle(currentPos)/180.0f,2) );
+            float dist = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx]);
+            AddVectorObs( roundDec(dist / maxDeviation,2));
             // front lidar
 
-            Vector3 offset = new Vector2(0.531f * Mathf.Sin((-33.09f - agentRB.rotation) * Mathf.Deg2Rad), 0.531f * Mathf.Cos((-33.09f - agentRB.rotation) * Mathf.Deg2Rad));
+            Vector3 offset = new Vector2(0.4594f * Mathf.Sin((-30.7f - agentRB.rotation) * Mathf.Deg2Rad), 0.4594f * Mathf.Cos((-30.7f - agentRB.rotation) * Mathf.Deg2Rad));
 
             for (int i = 0; i < nLaser; i++)
             {
@@ -120,12 +136,12 @@ public class MiR_Robot_Agent : Agent
                 if (displayLidar && hit)
                 {
                     Debug.DrawRay(agentRB.transform.position+offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
-                    Debug.DrawRay(agentRB.transform.position+offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                    Debug.DrawRay(agentRB.transform.position+offset, FrontsafetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
                     
 
                 if (hit)
-                    hitDistances[i] = hit.distance - safetyDistances[i];
+                    hitDistances[i] = hit.distance - FrontsafetyDistances[i];
                 else
                     hitDistances[i] = laserDist;
             }
@@ -157,12 +173,11 @@ public class MiR_Robot_Agent : Agent
                 lidarInput[i] = Mathf.Round(20*lidarInput[i]);
                 lidarInput[i] /= 20*laserDist;
             }
-
             AddVectorObs(lidarInput);
 
             // Rear lidar
 
-            offset = new Vector2(0.531f * Mathf.Sin((146.91f - agentRB.rotation) * Mathf.Deg2Rad), 0.531f * Mathf.Cos((146.91f - agentRB.rotation) * Mathf.Deg2Rad));
+            offset = new Vector2(0.4558f * Mathf.Sin((149.04f - agentRB.rotation) * Mathf.Deg2Rad), 0.4558f * Mathf.Cos((149.04f - agentRB.rotation) * Mathf.Deg2Rad));
 
             for (int i = 0; i < nLaser; i++)
             {
@@ -171,12 +186,12 @@ public class MiR_Robot_Agent : Agent
                 if (displayLidar && hit)
                 {
                     Debug.DrawRay(agentRB.transform.position + offset, hit.distance * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
-                    Debug.DrawRay(agentRB.transform.position + offset, safetyDistances[i] * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                    Debug.DrawRay(agentRB.transform.position + offset, BacksafetyDistances[i] * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
 
 
                 if (hit)
-                    hitDistances[i] = hit.distance - safetyDistances[i];
+                    hitDistances[i] = hit.distance - BacksafetyDistances[i];
                 else
                     hitDistances[i] = laserDist;
             }
@@ -205,11 +220,12 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < zones; i++)
             {
-                lidarInput[i] = Mathf.Round(20*lidarInput[i]);
-                lidarInput[i] /= 20*laserDist;
+                lidarInput[i] = Mathf.Round(20 * lidarInput[i]);
+                lidarInput[i] /= 20 * laserDist;
             }
 
             AddVectorObs(lidarInput);
+
         }
     }
 
@@ -311,6 +327,7 @@ public class MiR_Robot_Agent : Agent
 
         while (pathIdx < path.Length - 2 && distToIndex >= distToNextIndex)
         {
+            AddReward(0.01f);
             pathIdx += 1;
             distToIndex = distToNextIndex;
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
@@ -322,9 +339,6 @@ public class MiR_Robot_Agent : Agent
             AddReward(-0.002f);
         }
 
-        if (lastIndex < pathIdx)
-            AddReward(0.020f);
-        
         AddReward(-0.0005f * descionFreq);
 
         if (triggers > 0)
@@ -335,10 +349,10 @@ public class MiR_Robot_Agent : Agent
         //if (virtualLinearVelocity <= 0)
         //    AddReward(-0.0005f * descionFreq);
 
-        if (pathIdx > path.Length - 6)
+        if (pathIdx > path.Length - 41)
             currentPos = path[path.Length - 1];
         else
-            currentPos = path[pathIdx + 5];
+            currentPos = path[pathIdx + 40];
 
         //if (pathIdx > path.Length - 21)
         //    nextPos = path[path.Length - 1];
@@ -375,9 +389,9 @@ public class MiR_Robot_Agent : Agent
         } while (hit);
 
         pathIdx = 0;
-        currentPos = path[5];
+        currentPos = path[40];
         agentRB.transform.localPosition = path[0];
-        agentRB.rotation = Vector2.SignedAngle(simpleVec, path[5] - path[0]); // getTargetAngle(nextPos);
+        agentRB.rotation = Vector2.SignedAngle(simpleVec, path[40] - path[0]); // getTargetAngle(nextPos);
 
         agentRB.velocity = new Vector2(0.0f, 0.0f);
         agentRB.angularVelocity = 0.0f;
@@ -439,17 +453,17 @@ public class MiR_Robot_Agent : Agent
             string[] data_values = data_string.Split(',');
             string[] ting;
 
-            Vector2[] paths = new Vector2[data_values.Length / 16];
+            Vector2[] paths = new Vector2[data_values.Length / 2];
 
             float f1 = 0.0f;
             float f2 = 0.0f;
 
-            for (int i = 0; i < data_values.Length / 16; i++)
+            for (int i = 0; i < data_values.Length / 2; i++)
             {
-                ting = data_values[i * 16].Split('.');
+                ting = data_values[i * 2].Split('.');
                 f1 = Single.Parse(ting[0]) + Single.Parse(ting[1].Remove(4)) * Mathf.Pow(10, -4);
 
-                ting = data_values[(i * 16) + 1].Split('.');
+                ting = data_values[(i * 2) + 1].Split('.');
                 f2 = Single.Parse(ting[0]) + (Single.Parse(ting[1].Remove(4)) * Mathf.Pow(10, -4));
 
                 paths[i] = new Vector2(f1, f2);
@@ -458,6 +472,12 @@ public class MiR_Robot_Agent : Agent
             pathArray[index] = paths;
             index++;
         }
+    }
+
+    float roundDec(float x, int y)
+    {
+        double x_d = x;
+        return (float)Math.Round(x_d,y);
     }
 
 }
