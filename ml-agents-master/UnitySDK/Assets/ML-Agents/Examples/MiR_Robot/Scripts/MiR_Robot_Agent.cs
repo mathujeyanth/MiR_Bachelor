@@ -319,15 +319,14 @@ public class MiR_Robot_Agent : Agent
 
     public void CalcReward()
     {
-
+        float reward = 0;
         float distToIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx]);
         float distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
         float distanceToGoal = Vector2.Distance(agentRB.transform.localPosition, path[path.Length - 1]);
-        int lastIndex = pathIdx;
 
         while (pathIdx < path.Length - 2 && distToIndex >= distToNextIndex)
         {
-            AddReward(0.01f);
+            reward += 0.01f;
             pathIdx += 1;
             distToIndex = distToNextIndex;
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
@@ -336,14 +335,14 @@ public class MiR_Robot_Agent : Agent
         if (EnableMaxDiv && distToIndex > maxDeviation) //Meters it may deviate from path
         {
             //Done();
-            AddReward(-0.002f);
+            reward += -0.002f;
         }
 
-        AddReward(-0.0005f * descionFreq);
+        reward += -0.0005f * descionFreq;
 
         if (triggers > 0)
         {
-            AddReward(-0.005f * descionFreq);
+            reward += -0.005f * descionFreq;
         }
 
         //if (virtualLinearVelocity <= 0)
@@ -362,9 +361,9 @@ public class MiR_Robot_Agent : Agent
         if (distanceToGoal < safetyZone.radius)
         {
             Done();
-            AddReward(1f);
+            reward += 1f;
         }
-
+        AddReward(reward);
     }
 
     public override void AgentReset()
