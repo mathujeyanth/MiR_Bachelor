@@ -326,7 +326,7 @@ public class MiR_Robot_Agent : Agent
 
         while (pathIdx < path.Length - 2 && distToIndex >= distToNextIndex)
         {
-            reward += 0.01f;
+            reward += 0.0025f;
             pathIdx += 1;
             distToIndex = distToNextIndex;
             distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
