@@ -121,6 +121,7 @@ def update_rob_pos():
     global x_pose
     global y_pose
     global angle
+    global d1
 
     rob_x = x_pose
     rob_y = y_pose
@@ -158,13 +159,13 @@ def move():
     pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
     global safetyDistances
-    vinkelB = 33.09
-    lengthB = 0.7
-    lengthC = 0.5
+    vinkelB = 30.83
+    lengthB = 0.6
+    lengthC = 0.4576
     safetyDistances = np.zeros(541)
     degreesPrLaser = 270.0/(541-1)
     for i in range(0,541):
-        vinkelB = (i * degreesPrLaser) + 33.09
+        vinkelB = (i * degreesPrLaser) + 30.83
         if vinkelB > 180.0:
             vinkelB = 180.0 - (vinkelB - 180.0)
         safetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
@@ -186,6 +187,8 @@ def move():
     
     vel_msg = Twist()
 
+    #Variabler
+    maxDeviation = 2.0
     #Receiveing the user's input
     #print("Let's move your robot")
 
@@ -222,7 +225,7 @@ def move():
                 angle_dif = angle_dif + 2 * pi
 
 
-            input_array = ([round(linear_speed,2)*2,round(angular_speed,2)*2, round((angle_dif/pi),2),1])            
+            input_array = ([round(linear_speed,2)*2,round(angular_speed,2)*2, round((angle_dif/pi),2),round(d1/maxDeviation,2)])            
             input_array.extend(f_lidar.tolist())
             input_array.extend(b_lidar.tolist())
 
