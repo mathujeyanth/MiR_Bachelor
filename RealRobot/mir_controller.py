@@ -126,26 +126,25 @@ def update_rob_pos():
     rob_x = x_pose
     rob_y = y_pose
 
-    if (glo_path.size/2) != 0 and (glo_path.size/2) > path_index+21:
+    if (glo_path.size/2) != 0 and (glo_path.size/2) > path_index+2:
         #print(path_index)
         d1 = sqrt((glo_path[0,path_index]       -rob_x)**2+(glo_path[1,path_index]      -rob_y)**2)
         d2 = sqrt((glo_path[0,(path_index+1)]   -rob_x)**2+(glo_path[1,(path_index+1)]  -rob_y)**2)
 
-        while d1 >= d2 and (glo_path.size/2) > path_index+21:
+        while d1 >= d2 and (glo_path.size/2) > path_index+2:
             path_index = path_index + 1
             d1 = d2
             d2 = sqrt((glo_path[0,path_index+1]-rob_x)**2+(glo_path[1,path_index+1]-rob_y)**2)
 
-        v1 = np.array([glo_path[0,path_index+20],glo_path[1,path_index+20]])
-        v2 = np.array([rob_x,rob_y])
-        v3 = v1 - v2
-        simple = np.array([1,0])
-        robot_angle = angle_between(simple,v3)
-    else:
-        d = sqrt((glo_path[0,len(glo_path)-1]       -rob_x)**2+(glo_path[1,len(glo_path)-1]      -rob_y)**2)
-        if d < 2:
-            running = False
-        v1 = np.array([glo_path[0,len(glo_path)-1],glo_path[1,len(glo_path)-1]])
+        if (glo_path.size/2) > path_index+10:
+            v1 = np.array([glo_path[0,path_index+10],glo_path[1,path_index+10]])
+        else:
+            v1 = np.array([glo_path[0,len(glo_path)-1],glo_path[1,len(glo_path)-1]])
+            d = sqrt((glo_path[0,len(glo_path)-1]       -rob_x)**2+(glo_path[1,len(glo_path)-1]      -rob_y)**2)
+
+            if d < 1:
+                running = False
+
         v2 = np.array([rob_x,rob_y])
         v3 = v1 - v2
         simple = np.array([1,0])
