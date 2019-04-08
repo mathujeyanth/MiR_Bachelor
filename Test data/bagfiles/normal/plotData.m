@@ -5,7 +5,7 @@ clear;
 %% Import of data
 tic %Timing of section - Start timer
 
-normalBag = rosbag('simplePath_3.bag');
+normalBag = rosbag('pathMiRLocalPlanner.bag');
 
 bagselect_bscan= select(normalBag, 'Topic', '/b_scan');
 bagselect_fscan= select(normalBag,'Topic', '/f_scan');
@@ -44,6 +44,8 @@ for i=1:length(msgs)
     end
 end
 
+FrontLidarPosition = [0.4253 0.2345 0.2000];
+BackLidarPosition = [-0.3609 -0.2345 0.2000];
 disp('Time for section: "Calculating off-set"')
 toc %Timing of section - Stop timer
 %% Correct plotting of backScan and frontScan in same plot
@@ -51,22 +53,22 @@ toc %Timing of section - Stop timer
 % varTemp=msgs{6,1};
 % thetaFront = varTemp.readScanAngles;
 % theta=-thetaFront-thetaFront(1);
-% 
-% 
+%
+%
 % rangeFront = varTemp.Ranges;
 % [xFront,yFront] = pol2cart(theta,rangeFront);
 % xFront=xFront-FrontLidarPosition(1);
 % yFront=yFront+FrontLidarPosition(2);
-% 
+%
 % varTemp=msgs{1,1};
 % %thetaBack=varTemp.readScanAngles;
 % rangeBack=varTemp.Ranges;
 % [xBack,yBack]=pol2cart(theta,-rangeBack);
 % xBack=xBack-BackLidarPosition(1);
 % yBack=yBack+BackLidarPosition(2);
-% 
+%
 % figure(1)
-% 
+%
 % hold on
 % for i=1:length(rangeFront)
 %     if rangeFront(i) >= 25 || rangeFront(i) == 0
@@ -76,7 +78,7 @@ toc %Timing of section - Stop timer
 %     end
 %     hold on
 % end
-% 
+%
 % for i=1:length(rangeBack)
 %     if rangeBack(i) >= 25 || rangeBack(i) == 0
 %         continue
@@ -119,9 +121,8 @@ index_front=1;
 index_back=1;
 %Allocate size matching number of scans along with number of LIDAR
 clear vecFront vecBack
-vecFront=zeros(bagselect_bscan.NumMessages,541); 
+vecFront=zeros(bagselect_bscan.NumMessages,541);
 vecBack=zeros(bagselect_fscan.NumMessages,541);
-
 
 for i=1:length(msgs)
     if strcmp(msgs{i,1}.MessageType, 'sensor_msgs/LaserScan')
@@ -136,6 +137,7 @@ for i=1:length(msgs)
     end
 end
 
+
 clear index_front index_back
 disp('Time for section: "Move of data into 2 vectors"')
 toc %Timing of section - Stop timer
@@ -143,7 +145,7 @@ toc %Timing of section - Stop timer
 tic %Timing of section - Start timer
 
 thetaFront = msgs{1,1}.readScanAngles;
-theta=-thetaFront-thetaFront(1); 
+theta=-thetaFront-thetaFront(1);
 clear thetaFront
 
 clear xFront yFront xBack yBack %Deletion of old matrices - ensures correct creation of matrices
@@ -166,7 +168,8 @@ disp('Time for section:"Applying off-set"')
 toc %Timing of section - Stop timer
 %% Removal of invalid data
 tic %Timing of section - Start timer
-for i=1:504
+
+for i=1:min(size(vecFront,1),size(vecBack,1))
     for j=1:length(theta)
         if vecFront(i,j) >= 25 || vecFront(i,j) == 0
             xFront(i,j)=NaN;
@@ -182,18 +185,69 @@ end
 disp('Time for section:"Removal of invalid data"')
 toc %Timing of section - Stop timer
 %% Plot of front and back with correct off-set
-tic %Timing of section - Start timer
-for i=1:504
-    figure(1)
-    
-    scatter(xFront(i,:),yFront(i,:),'.','blue')
-    hold on
-    scatter(xBack(i,:),yBack(i,:),'.','red');
-    axis([-20 20 -20 20])
+
+for i=1:min(size(vecFront,1),size(vecBack,1))
+    for j=1:541
+        if(sqrt(xFront(i,j)^2+yFront(i,j)^2)<=5)
+            %Only object within 5 metres
+            xNewFront(i,j)=xFront(i,j);
+            yNewFront(i,j)=yFront(i,j);
+        else
+            xNewFront(i,j)=nan;
+            yNewFront(i,j)=nan;
+        end
+        
+        if(sqrt(xBack(i,j)^2+yBack(i,j)^2)<=5)
+            %Only object within 5 metres
+            xNewBack(i,j)=xBack(i,j);
+            yNewBack(i,j)=yBack(i,j);
+        else
+            xNewBack(i,j)=nan;
+            yNewBack(i,j)=nan;
+        end
+    end
+       
     hold off
-    disp(i)
-    pause(50/1000)
+    toc
 end
+
+tic %Timing of section - Start timer
+
+for i=1:min(size(vecFront,1),size(vecBack,1))
+    figure(1)
+    tic
+    scatter(-1.*xNewFront(i,:),yNewFront(i,:),'.','blue')
+    hold on
+    scatter(-1.*xNewBack(i,:),yNewBack(i,:),'.','red');
+    axis([-20 20 -20 20])
+    pause(50/1000)
+    hold off
+    toc
+end
+
+
+% figure(5)
+% hold on
+%
+%
+% for i=1:541
+%
+%     if (~isnan(xFront(1,i)) & ~isnan(yFront(1,i)))
+%
+%
+% %         if(sqrt(xFront(1,i)^2+yFront(1,i)^2)<=5)
+%             scatter(xFront(1,i),yFront(1,i),'.','blue')
+%
+%             pause(50/1000)
+% %         end
+%         axis([-18 2 -2 10])
+% %         polarplot(cart2pol(xFront(1,i),yFront(1,i)))
+%     end
+%
+%
+% end
+%
+% hold off
 
 disp('Time for section:"Plot of front and back with correct off-set"')
 toc %Timing of section - Stop timer
