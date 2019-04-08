@@ -173,6 +173,11 @@ public class MiR_Robot_Agent : Agent
                 lidarInput[i] = Mathf.Round(20*lidarInput[i]);
                 lidarInput[i] /= 20*laserDist;
             }
+            //Debug.Log("Front = " + String.Join(" ",
+            // new List<float>(lidarInput)
+            // .ConvertAll(i => i.ToString())
+            // .ToArray()));
+
             AddVectorObs(lidarInput);
 
             // Rear lidar
