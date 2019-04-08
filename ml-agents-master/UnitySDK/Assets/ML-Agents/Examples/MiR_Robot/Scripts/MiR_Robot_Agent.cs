@@ -112,7 +112,7 @@ public class MiR_Robot_Agent : Agent
 
         descionFreq = agentParameters.numberOfActionsBetweenDecisions;
     }
-
+    
 
     public override void CollectObservations()
     {
@@ -308,16 +308,21 @@ public class MiR_Robot_Agent : Agent
             if (Mathf.Abs(moveHorizontal) > 0.10f)
                 targetHoizontal = moveHorizontal * angularVelocityLimit;
             else
-                targetHoizontal = 0.0f; 
+                targetHoizontal = 0.0f;
         //}
 
+        if (Mathf.Sqrt(Mathf.Pow(moveHorizontal, 2) + Mathf.Pow(moveVertical, 2)) > 1 && moveVertical > 0)
+            moveVertical = Mathf.Sqrt(1 - Mathf.Pow(moveHorizontal,2));
+
+        if (Mathf.Sqrt(Mathf.Pow(moveHorizontal, 2) + Mathf.Pow(moveVertical, 2)) > 1 && moveVertical < 0)
+            moveVertical = -1*Mathf.Sqrt(1 - Mathf.Pow(moveHorizontal, 2));
 
         //if (moveVertical != 0)
         //{
-            if (moveVertical > 0)
-                targetVertical = moveVertical * linearVelocityLimit * (1 - Mathf.Abs(moveHorizontal));
+        if (moveVertical > 0)
+                targetVertical = moveVertical * linearVelocityLimit;
             else
-                targetVertical = moveVertical * linearReverseVelocityLimit * (1 - Mathf.Abs(moveHorizontal));
+                targetVertical = moveVertical * linearReverseVelocityLimit;
         //}
 
     }
