@@ -136,8 +136,8 @@ def update_rob_pos():
             d1 = d2
             d2 = sqrt((glo_path[0,path_index+1]-rob_x)**2+(glo_path[1,path_index+1]-rob_y)**2)
 
-        if (glo_path.size/2) > path_index+10:
-            v1 = np.array([glo_path[0,path_index+10],glo_path[1,path_index+10]])
+        if (glo_path.size/2) > path_index+41:
+            v1 = np.array([glo_path[0,path_index+40],glo_path[1,path_index+40]])
         else:
             v1 = np.array([glo_path[0,len(glo_path)-1],glo_path[1,len(glo_path)-1]])
             d = sqrt((glo_path[0,len(glo_path)-1]       -rob_x)**2+(glo_path[1,len(glo_path)-1]      -rob_y)**2)
