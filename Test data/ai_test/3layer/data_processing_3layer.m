@@ -8,18 +8,20 @@ numRuns=30;
 tic
 %Find longest vector
 vecLength=0;
-for i=1:numRuns
-    filename = strcat('run_2layer_test',num2str(i),'-0_MiR_Robot_LBrain-tag-Environment_Cumulative Reward.csv');
+for i=1:numRuns 
+    filename = strcat('run_3layer_test',num2str(i),'-0_MiR_Robot_LBrain-tag-Environment_Cumulative Reward.csv');
     temp_data=importdata(filename);
     if size(temp_data.data,1)>vecLength
         vecLength=size(temp_data.data,1);
     end
+   
 end
+
 
 %Import data to zero-padded matrix
 data=zeros(vecLength,2*numRuns);
 for i=1:numRuns
-    filename = strcat('run_2layer_test',num2str(i),'-0_MiR_Robot_LBrain-tag-Environment_Cumulative Reward.csv');
+    filename = strcat('run_3layer_test',num2str(i),'-0_MiR_Robot_LBrain-tag-Environment_Cumulative Reward.csv');
     temp_data=importdata(filename);
     data(1:length(temp_data.data),2*i)=temp_data.data(:,2);
     data(1:length(temp_data.data),2*i+1)=temp_data.data(:,3);
@@ -55,10 +57,19 @@ end
 
 disp('Data processomg took:')
 toc
+
+
+%% Removing run 14 and 19 because of weirdness
+disp('Mean self calculated')
+sum(output)/numRuns
+disp('---')
+output(14)=NaN;
+output(19)=NaN;
+numRuns=28;
 %% Calculating confidence interval
 disp('Lower confidence interval at 90%')
-mean(output)-norminv(0.90+(1-0.90)/2)*std(output)/sqrt(numRuns)
+nanmean(output)-norminv(0.90+(1-0.90)/2)*nanstd(output)/sqrt(numRuns)
 disp('Mean')
-mean(output)
+nanmean(output)
 disp('Upper confidence interval at 90%')
-mean(output)+norminv(0.90+(1-0.90)/2)*std(output)/sqrt(numRuns)
+nanmean(output)+norminv(0.90+(1-0.90)/2)*nanstd(output)/sqrt(numRuns)
