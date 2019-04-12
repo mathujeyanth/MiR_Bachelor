@@ -13,6 +13,8 @@ public class MiR_Robot_Agent : Agent
     public bool displayPath = false;
 
     public bool EnableMaxDiv = true;
+    public bool EnableUncertainty = true;
+
 
     private Vector2[] path;
 
@@ -58,6 +60,10 @@ public class MiR_Robot_Agent : Agent
 
     private const int overlap = 1;
     private const int zones = 8;
+
+    private Vector2 TimeFrameP0;
+    private Vector2 TimeFrameP1;
+    private Vector2 TimeFrameP2;
 
     private float[] lidarInput = new float[zones];
 
@@ -124,12 +130,15 @@ public class MiR_Robot_Agent : Agent
             AddVectorObs( roundDec(getTargetAngle(currentPos)/180.0f,2) );
             float dist = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx]);
             AddVectorObs( roundDec(dist / maxDeviation,2));
+            float randomVal = 0.0f;
             // front lidar
 
             Vector3 offset = new Vector2(0.4594f * Mathf.Sin((-30.7f - agentRB.rotation) * Mathf.Deg2Rad), 0.4594f * Mathf.Cos((-30.7f - agentRB.rotation) * Mathf.Deg2Rad));
 
             for (int i = 0; i < nLaser; i++)
             {
+                if (EnableUncertainty)
+                    randomVal = (float)((rnd.NextDouble()+rnd.NextDouble()-1)*0.1);
 
                 hit = Physics2D.Raycast(agentRB.transform.position+offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
@@ -141,11 +150,11 @@ public class MiR_Robot_Agent : Agent
                     
 
                 if (hit)
-                    hitDistances[i] = hit.distance - FrontsafetyDistances[i];
+                    hitDistances[i] = hit.distance - FrontsafetyDistances[i] + randomVal;
                 else
                     hitDistances[i] = laserDist;
             }
-
+            
             for (int i = 0;i<zones;i++)
             {
                 lidarInput[i] = laserDist;
@@ -186,6 +195,9 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < nLaser; i++)
             {
+                if (EnableUncertainty)
+                    randomVal = (float)((rnd.NextDouble() + rnd.NextDouble() - 1) * 0.1);
+
                 hit = Physics2D.Raycast(agentRB.transform.position + offset, (new Vector2(Mathf.Sin((((i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
                 if (displayLidar && hit)
@@ -196,7 +208,7 @@ public class MiR_Robot_Agent : Agent
 
 
                 if (hit)
-                    hitDistances[i] = hit.distance - BacksafetyDistances[i];
+                    hitDistances[i] = hit.distance - BacksafetyDistances[i] + randomVal;
                 else
                     hitDistances[i] = laserDist;
             }
@@ -255,6 +267,33 @@ public class MiR_Robot_Agent : Agent
 
     void FixedUpdate()
     {
+        int ran;
+        if (EnableUncertainty)
+        {
+            TimeFrameP2 = TimeFrameP1;
+            TimeFrameP1 = TimeFrameP0;
+
+            ran = rnd.Next(0,1);
+            switch(ran)
+            {
+                case 0:
+                    targetVertical = TimeFrameP1[0];
+                    targetHoizontal = TimeFrameP1[1];
+                    break;
+                case 1:
+                    targetVertical = TimeFrameP2[0];
+                    targetHoizontal = TimeFrameP2[1];
+                    break;
+            }
+        }
+        else
+        {
+            targetVertical = TimeFrameP0[0];
+            targetHoizontal = TimeFrameP0[1];
+        }
+            
+            
+
         if (targetVertical != 0)
         {
             if (virtualLinearVelocity < targetVertical)
@@ -303,13 +342,10 @@ public class MiR_Robot_Agent : Agent
         moveHorizontal = Mathf.Clamp(act[0], -1, 1);
         moveVertical = Mathf.Clamp(act[1], -1, 1);
         
-        //if (moveHorizontal != 0)
-        //{
-            if (Mathf.Abs(moveHorizontal) > 0.10f)
-                targetHoizontal = moveHorizontal * angularVelocityLimit;
-            else
-                targetHoizontal = 0.0f;
-        //}
+        if (Mathf.Abs(moveHorizontal) > 0.10f)
+           targetHoizontal = moveHorizontal * angularVelocityLimit;
+        else
+           targetHoizontal = 0.0f;
 
         if (Mathf.Sqrt(Mathf.Pow(moveHorizontal, 2) + Mathf.Pow(moveVertical, 2)) > 1 && moveVertical > 0)
             moveVertical = Mathf.Sqrt(1 - Mathf.Pow(moveHorizontal,2));
@@ -317,14 +353,12 @@ public class MiR_Robot_Agent : Agent
         if (Mathf.Sqrt(Mathf.Pow(moveHorizontal, 2) + Mathf.Pow(moveVertical, 2)) > 1 && moveVertical < 0)
             moveVertical = -1*Mathf.Sqrt(1 - Mathf.Pow(moveHorizontal, 2));
 
-        //if (moveVertical != 0)
-        //{
         if (moveVertical > 0)
-                targetVertical = moveVertical * linearVelocityLimit;
-            else
-                targetVertical = moveVertical * linearReverseVelocityLimit;
-        //}
+            targetVertical = moveVertical * linearVelocityLimit;
+        else
+            targetVertical = moveVertical * linearReverseVelocityLimit;
 
+        TimeFrameP0 = new Vector2(targetVertical, targetHoizontal);
     }
 
     public void CalcReward()
