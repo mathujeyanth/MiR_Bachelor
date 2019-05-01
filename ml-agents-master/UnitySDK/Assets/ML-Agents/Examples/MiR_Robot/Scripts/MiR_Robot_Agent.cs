@@ -14,6 +14,7 @@ public class MiR_Robot_Agent : Agent
 
     public bool EnableMaxDiv = true;
     public bool EnableUncertainty = true;
+    public bool testAgent = false;
 
 
     private Vector2[] path;
@@ -74,6 +75,30 @@ public class MiR_Robot_Agent : Agent
     private Rigidbody2D agentRB;
     private CircleCollider2D safetyZone;
 
+    // Stream
+    //private StreamWriter sw;
+    // Bool test agent
+    
+    // Time
+    private int timeStep = 0;
+    // Linear 
+    private float minSpeed = 0;
+    private float maxSpeed = 0;
+    private float averageSpeed = 0;
+    private float steps90 = 0;
+    private float steps10 = 0;
+    private float steps0 = 0;
+    // Angular
+    private float maxAbsVal = 0;
+    private float sumAbsVal = 0;
+    // Clearance
+    private float minUS = 0;
+    private float averageUS = 0;
+    private float minMS = 0;
+    private float averageMS = 0;
+    // Path
+    private float averageDiv = 0;
+
     public override void InitializeAgent()
     {
         base.InitializeAgent();
@@ -83,10 +108,8 @@ public class MiR_Robot_Agent : Agent
         ReadCSVFile();
 
         float lengthB = safetyZone.radius;
-
         float vinkelB = 30.7f;
         float lengthC = 0.4594f;
-
         for (int i = 0;i<nLaser;i++)
         {
             vinkelB = (i * degreesPrLaser) + 30.7f;
@@ -135,6 +158,9 @@ public class MiR_Robot_Agent : Agent
 
             Vector3 offset = new Vector2(0.4594f * Mathf.Sin((-30.7f - agentRB.rotation) * Mathf.Deg2Rad), 0.4594f * Mathf.Cos((-30.7f - agentRB.rotation) * Mathf.Deg2Rad));
 
+            float minValAvUs = laserDist;
+            float minValAvMs = laserDist;
+
             for (int i = 0; i < nLaser; i++)
             {
                 if (EnableUncertainty)
@@ -147,7 +173,21 @@ public class MiR_Robot_Agent : Agent
                     Debug.DrawRay(agentRB.transform.position+offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
                     Debug.DrawRay(agentRB.transform.position+offset, FrontsafetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
-                    
+
+                if (testAgent && hit)
+                {
+                    if (minValAvUs > hit.distance)
+                        minValAvUs = hit.distance;
+
+                    if (minValAvMs > hit.distance - BacksafetyDistances[i])
+                        minValAvMs = hit.distance - BacksafetyDistances[i];
+
+                    if (minUS > hit.distance)
+                        minUS = hit.distance;
+
+                    if (minMS > hit.distance - BacksafetyDistances[i])
+                        minMS = hit.distance - BacksafetyDistances[i];
+                }
 
                 if (hit)
                     hitDistances[i] = hit.distance - FrontsafetyDistances[i] + randomVal;
@@ -206,6 +246,20 @@ public class MiR_Robot_Agent : Agent
                     Debug.DrawRay(agentRB.transform.position + offset, BacksafetyDistances[i] * (new Vector2(Mathf.Sin(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
 
+                if (testAgent && hit)
+                {
+                    if (minValAvUs > hit.distance)
+                        minValAvUs = hit.distance;
+
+                    if (minValAvMs > hit.distance - BacksafetyDistances[i])
+                        minValAvMs = hit.distance - BacksafetyDistances[i];
+
+                    if (minUS > hit.distance)
+                        minUS = hit.distance;
+
+                    if (minMS > hit.distance - BacksafetyDistances[i])
+                        minMS = hit.distance - BacksafetyDistances[i];
+                }
 
                 if (hit)
                     hitDistances[i] = hit.distance - BacksafetyDistances[i] + randomVal;
@@ -243,6 +297,11 @@ public class MiR_Robot_Agent : Agent
 
             AddVectorObs(lidarInput);
 
+            if (testAgent)
+            {
+                averageUS = averageUS + minValAvUs;
+                averageMS = averageMS + minValAvMs;
+            }
         }
     }
 
@@ -256,11 +315,6 @@ public class MiR_Robot_Agent : Agent
             {
                 Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.red);
             }
-            //for (int i = 0; i < 200; i++)
-            //{
-            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][0], (Vector2)transform.parent.position + pathArray[i][4], Color.red);
-            //    Debug.DrawLine((Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 5], (Vector2)transform.parent.position + pathArray[i][pathArray[i].Length - 1], Color.red);
-            //}
         }
         
     }
@@ -363,6 +417,7 @@ public class MiR_Robot_Agent : Agent
 
     public void CalcReward()
     {
+
         float reward = 0;
         float distToIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx]);
         float distToNextIndex = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx + 1]);
@@ -402,6 +457,39 @@ public class MiR_Robot_Agent : Agent
         //else
         //    nextPos = path[pathIdx + 20];
 
+        if (testAgent)
+        {
+            // Time
+            timeStep++;
+
+            // Linear
+            if (minSpeed > virtualLinearVelocity)
+                minSpeed = virtualLinearVelocity;
+
+            if (maxSpeed < virtualLinearVelocity)
+                maxSpeed = virtualLinearVelocity;
+
+            averageSpeed = averageSpeed + virtualLinearVelocity;
+
+            if (virtualLinearVelocity > linearVelocityLimit * 0.9f)
+                steps90++;
+
+            if (virtualLinearVelocity < linearVelocityLimit * 0.1f)
+                steps10++;
+
+            if (virtualLinearVelocity < 0)
+                steps0++;
+
+            // Angular
+            if (Mathf.Abs(virtualAngularVelocity) > maxAbsVal)
+                maxAbsVal = Mathf.Abs(virtualAngularVelocity);
+
+            sumAbsVal = sumAbsVal + Mathf.Abs(virtualAngularVelocity);
+
+            // Path
+            averageDiv = averageDiv + distToIndex;
+        }
+
         if (distanceToGoal < safetyZone.radius)
         {
             Done();
@@ -412,6 +500,64 @@ public class MiR_Robot_Agent : Agent
 
     public override void AgentReset()
     {
+        // print test
+        if (testAgent && timeStep != 0)
+        {
+            string output = "";
+            output += "\n";
+            output += timeStep;
+            output += " ";
+            output += minSpeed;
+            output += " ";
+            output += maxSpeed;
+            output += " ";
+            output += averageSpeed / timeStep;
+            output += " ";
+            output += steps90;
+            output += " ";
+            output += steps10;
+            output += " ";
+            output += steps0;
+            output += " ";
+            output += maxAbsVal;
+            output += " ";
+            output += sumAbsVal / timeStep;
+            output += " ";
+            output += minUS;
+            output += " ";
+            output += averageUS / timeStep;
+            output += " ";
+            output += minMS;
+            output += " ";
+            output += averageMS / timeStep;
+            output += " ";
+            output += averageDiv / timeStep;
+            output += " ";
+
+
+            File.AppendAllText("data.txt", output);
+
+            // Time
+            timeStep = 0;
+            // Linear 
+            minSpeed = 0;
+            maxSpeed = 0;
+            averageSpeed = 0;
+            steps90 = 0;
+            steps10 = 0;
+            steps0 = 0;
+            // Angular
+            maxAbsVal = 0;
+            sumAbsVal = 0;
+            // Clearance
+            minUS = laserDist;
+            averageUS = 0;
+            minMS = laserDist;
+            averageMS = 0;
+            // Path
+            averageDiv = 0;
+        }
+
         int pathNr;
         RaycastHit2D hit = Physics2D.Raycast((Vector2)transform.parent.position, transform.up, 1);
 

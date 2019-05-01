@@ -836,7 +836,7 @@ Prefab:
     - target: {fileID: 114484208518308700, guid: 2777fb70ff984a6458e808d273fa233e,
         type: 2}
       propertyPath: trainingConfiguration.timeScale
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2777fb70ff984a6458e808d273fa233e, type: 2}

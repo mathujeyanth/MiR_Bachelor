@@ -149,7 +149,7 @@ public class PlayerController : MonoBehaviour
 
     //void OnCollisionEnter2D(Collision2D col)
     //{
-        
+
     //    Debug.Log("Collision!");
     //}
 
@@ -163,5 +163,4 @@ public class PlayerController : MonoBehaviour
     //    //Remember to close your StreamWriter!
     //    sw.Close();
     //}
-
 }   
