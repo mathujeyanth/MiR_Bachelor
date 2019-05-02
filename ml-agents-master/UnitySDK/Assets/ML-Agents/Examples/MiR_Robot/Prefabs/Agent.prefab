@@ -171,7 +171,7 @@ MonoBehaviour:
   displayPath: 0
   EnableMaxDiv: 1
   EnableUncertainty: 1
-  testAgent: 1
+  testAgent: 0
   linearMaxAcceleration: 0.5
   angularMaxAcceleration: 0.5
   linearVelocityLimit: 1.5
