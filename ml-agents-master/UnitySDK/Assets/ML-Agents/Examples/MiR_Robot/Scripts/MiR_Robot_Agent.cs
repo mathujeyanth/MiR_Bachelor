@@ -7,7 +7,7 @@ using System;
 
 public class MiR_Robot_Agent : Agent
 {
-    public float laserDist = 5;
+    public float laserDist = 2;
     public bool useVectorObs = true;
     public bool displayLidar = false;
     public bool displayPath = false;
@@ -70,8 +70,6 @@ public class MiR_Robot_Agent : Agent
 
     private RaycastHit2D hit;
 
-    public TextAsset pathesCSV;
-
     private Rigidbody2D agentRB;
     private CircleCollider2D safetyZone;
 
@@ -105,7 +103,6 @@ public class MiR_Robot_Agent : Agent
         safetyZone = GetComponent<CircleCollider2D>();
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
-        ReadCSVFile();
 
         float lengthB = safetyZone.radius;
         float vinkelB = 30.7f;
@@ -434,7 +431,7 @@ public class MiR_Robot_Agent : Agent
         if (EnableMaxDiv && distToIndex > maxDeviation) //Meters it may deviate from path
         {
             //Done();
-            reward += -0.002f;
+            reward += -0.001f * descionFreq;
         }
 
         reward += -0.0005f * descionFreq;
@@ -625,7 +622,7 @@ public class MiR_Robot_Agent : Agent
         return rotation;
     }
 
-    void ReadCSVFile()
+    void ReadCSVFile(TextAsset pathesCSV)
     {
         pathArray = new Vector2[200][];
         string[] allPathsString = pathesCSV.text.Split('\n');

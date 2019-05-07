@@ -15,9 +15,13 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
     public GameObject Agents;
 
     public int[] AgentsPerMap;
+
     private int mapNumber = 0;
 
     public Texture2D[] maps;
+
+    public TextAsset[] paths;
+
     private int addCol = 0;
 
     private GameObject mapObj;
@@ -116,9 +120,10 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
         {
             GameObject agent = new GameObject("Agent" + k);
             Vector3 position = new Vector3(addCol, 0);
+            agent.transform.position = position;
             GameObject agents = Instantiate(Agents, position, Quaternion.identity) as GameObject;
             agents.transform.parent = agent.transform;
+            agents.SendMessage("ReadCSVFile", paths[mapNumber]);
         }
-
     }
 }
