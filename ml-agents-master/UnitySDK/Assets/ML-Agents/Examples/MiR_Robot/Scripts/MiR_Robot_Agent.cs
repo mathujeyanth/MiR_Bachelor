@@ -564,7 +564,7 @@ public class MiR_Robot_Agent : Agent
             path = pathArray[pathNr];
             for (int i =0;i<36;i++)
             {
-                hit = Physics2D.Raycast((Vector2)transform.parent.position + path[0], (new Vector2(Mathf.Sin((i * 10) * Mathf.Deg2Rad), Mathf.Cos((i * 10) * Mathf.Deg2Rad))), 1);
+                hit = Physics2D.Raycast((Vector2)transform.parent.position + path[0], (new Vector2(Mathf.Sin((i * 10) * Mathf.Deg2Rad), Mathf.Cos((i * 10) * Mathf.Deg2Rad))), safetyZone.radius);
                 if (hit)
                 {
                     //Debug.Log(pathNr + " " + transform.parent.gameObject.name);
