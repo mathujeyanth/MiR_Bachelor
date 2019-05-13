@@ -14,6 +14,10 @@ public class MiR_Robot_Agent : Agent
 
     public bool EnableMaxDiv = true;
     public bool EnableUncertainty = true;
+
+    
+    private GameObject[] spawnedObs;
+
     public bool testAgent = false;
 
 
@@ -73,10 +77,13 @@ public class MiR_Robot_Agent : Agent
     private Rigidbody2D agentRB;
     private CircleCollider2D safetyZone;
 
+    private bool SpawnStaticObs = false;
+    public GameObject[] obstacles;
+
     // Stream
     //private StreamWriter sw;
     // Bool test agent
-    
+
     // Time
     private int timeStep = 0;
     // Linear 
@@ -103,6 +110,19 @@ public class MiR_Robot_Agent : Agent
         safetyZone = GetComponent<CircleCollider2D>();
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
+
+        if(SpawnStaticObs)
+        {
+            spawnedObs = new GameObject[obstacles.Length];
+            GameObject obs = new GameObject("Obstacles");
+            for (int i = 0; i<obstacles.Length;i++)
+            {
+                Vector3 position = new Vector3(0, 0);
+                GameObject tempObs = Instantiate(obstacles[i], position, Quaternion.identity) as GameObject;
+                tempObs.transform.parent = obs.transform;
+                spawnedObs[i] = tempObs;
+            }
+        }
 
         float lengthB = safetyZone.radius;
         float vinkelB = 30.7f;
@@ -574,6 +594,27 @@ public class MiR_Robot_Agent : Agent
             }
         } while (hit);
 
+        if(SpawnStaticObs)
+        {
+            float randomAng;
+            float randomPos;
+            int randomIndex;
+            Vector2 pos;
+            for (int i = 0; i<obstacles.Length;i++)
+            {
+                randomAng = (float)((rnd.NextDouble()*2 - 1));
+                randomPos = (float)((rnd.NextDouble() * 2 - 1));
+                if(path.Length < 120)
+                    randomIndex = rnd.Next(0, path.Length);
+                else
+                    randomIndex = rnd.Next(60, path.Length - 60);
+                pos = path[randomIndex];
+                pos += new Vector2(randomPos, randomPos);
+                spawnedObs[i].transform.position = pos + (Vector2)transform.parent.position;
+                spawnedObs[i].transform.Rotate(new Vector3(0, 0, (randomAng * 360f)));
+            }
+        }
+
         pathIdx = 0;
         currentPos = path[40];
         agentRB.transform.localPosition = path[0];
@@ -664,6 +705,21 @@ public class MiR_Robot_Agent : Agent
     {
         double x_d = x;
         return (float)Math.Round(x_d,y);
+    }
+
+    void SpawnStaticObsFunc()
+    {
+        SpawnStaticObs = true;
+
+        spawnedObs = new GameObject[obstacles.Length];
+        GameObject obs = new GameObject("Obstacles");
+        for (int i = 0; i < obstacles.Length; i++)
+        {
+            Vector3 position = new Vector3(0, 0);
+            GameObject tempObs = Instantiate(obstacles[i], position, Quaternion.identity) as GameObject;
+            tempObs.transform.parent = obs.transform;
+            spawnedObs[i] = tempObs;
+        }
     }
 
 }

@@ -22,6 +22,8 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
 
     public TextAsset[] paths;
 
+    public bool[] spawnStaticObs;
+
     private int addCol = 0;
 
     private GameObject mapObj;
@@ -124,6 +126,9 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
             GameObject agents = Instantiate(Agents, position, Quaternion.identity) as GameObject;
             agents.transform.parent = agent.transform;
             agents.SendMessage("ReadCSVFile", paths[mapNumber]);
+
+            if (spawnStaticObs[mapNumber])
+                agents.SendMessage("SpawnStaticObsFunc");
         }
     }
 }
