@@ -258,7 +258,7 @@ def move():
             input_tensor = input_tensor.flatten()
 
             output_tensor = np.array([0,0])
-            eps = np.array([0.2,0.2])
+            eps = np.array([0.1,0.1])
             output_tensor = pred.getPrediction([eps], [input_tensor])
 
             linear_vel = output_tensor[0][1]
