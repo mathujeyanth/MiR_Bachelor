@@ -189,7 +189,9 @@ def move():
     b_laserScan_sub = rospy.Subscriber("/b_raw_scan", LaserScan, b_lidar_callback)  ## len(data.ranges)
     f_laserScan_sub = rospy.Subscriber("/f_raw_scan", LaserScan, f_lidar_callback)
 
-    rate = rospy.Rate(2)
+    time = 5
+    timeStep = 1/time
+    rate = rospy.Rate(time)
     rate.sleep()
 
     velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
@@ -218,18 +220,22 @@ def move():
     # time_frame_5 = np.zeros(20)
     # time_frame_5.tolist()
 
+    virtualLinearVel = 0
+    virtualAngularVel = 0
+    targetLinear = 0
+    targetAngular = 0
+    linearMaxAcceleration = 0.5
+    angularMaxAcceleration = 0.5
+
+
     key = bool(input("Start?"))
 
     while not rospy.is_shutdown():
         rate.sleep()
-        #print(f_lidar)
-        #print(b_lidar)
-        
 
         if running:
             update_rob_pos()
-            #print("Robot angle and angle to position")
-            #print(angle - robot_angle)
+
             angle_dif = (angle - robot_angle)
             if angle_dif > pi:
                 angle_dif = angle_dif - 2 * pi
@@ -238,21 +244,15 @@ def move():
 
             
 
-            input_array = ([round(linear_speed,2),round(angular_speed,2), round((angle_dif/pi),2),round(d1/maxDeviation,2)])            
+            input_array = ([round(virtualLinearVel,2),round(virtualAngularVel,2), round((angle_dif/pi),2),round(d1/maxDeviation,2)])            
             input_array.extend(f_lidar.tolist())
             input_array.extend(b_lidar.tolist())
-
-            #our_string = " ".join(str(e) for e in input_array)
-            #f.write(our_string)
-            #f.write('\n')
 
             #time_frame_5 = time_frame_4
             #time_frame_4 = time_frame_3
             #time_frame_3 = time_frame_2
             time_frame_2 = time_frame_1
             time_frame_1 = input_array
-            
-            #input_tensor.clear()
 
             input_tensor = np.array([time_frame_1,time_frame_2]) # ,time_frame_3,time_frame_4,time_frame_5
             input_tensor = input_tensor.flatten()
@@ -261,17 +261,30 @@ def move():
             eps = np.array([0.2,0.2])
             output_tensor = pred.getPrediction([eps], [input_tensor])
 
-            linear_vel = output_tensor[0][1] * 0.8
-            if linear_vel < 0:
-                linear_vel = linear_vel * (1/3)
+            linear_vel = output_tensor[0][1]
             angular_vel = output_tensor[0][0]
-            
 
-            #if abs(angular_vel) < 0.1:
-            #    angular_vel = 0
+            if abs(angular_vel) < 0.1:
+                angular_vel = 0
 
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel > 0:
                 linear_vel = sqrt(1-(angular_vel**2))
+
+            if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
+                linear_vel = -sqrt(1-(angular_vel**2))
+
+            targetLinear = linear_vel
+            targetAngular = angular_vel
+
+            if targetLinear < virtualLinearVel:
+                virtualLinearVel -= linearMaxAcceleration*timeStep
+            else:
+                virtualLinearVel += linearMaxAcceleration*timeStep
+
+            if targetAngular < virtualAngularVel:
+                virtualAngularVel -= angularMaxAcceleration*timeStep
+            else:
+                virtualAngularVel += angularMaxAcceleration*timeStep
 
             print("Input array")
             print(input_array)
@@ -279,12 +292,12 @@ def move():
             #print(angle_dif)
 
 
-            vel_msg.linear.x = linear_vel
+            vel_msg.linear.x = virtualLinearVel
             vel_msg.linear.y = 0
             vel_msg.linear.z = 0
             vel_msg.angular.x = 0
             vel_msg.angular.y = 0
-            vel_msg.angular.z = angular_vel
+            vel_msg.angular.z = virtualAngularVel
             velocity_publisher.publish(vel_msg)
         else:
             #f.close()

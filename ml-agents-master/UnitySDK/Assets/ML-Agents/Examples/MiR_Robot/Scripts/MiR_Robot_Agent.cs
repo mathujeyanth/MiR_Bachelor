@@ -424,6 +424,7 @@ public class MiR_Robot_Agent : Agent
         if (Mathf.Sqrt(Mathf.Pow(moveHorizontal, 2) + Mathf.Pow(moveVertical, 2)) > 1 && moveVertical < 0)
             moveVertical = -1*Mathf.Sqrt(1 - Mathf.Pow(moveHorizontal, 2));
 
+
         if (moveVertical > 0)
             targetVertical = moveVertical * linearVelocityLimit;
         else
@@ -454,7 +455,7 @@ public class MiR_Robot_Agent : Agent
             reward += -0.001f * descionFreq;
         }
 
-        reward += -0.0005f * descionFreq;
+        reward += -0.00125f * descionFreq;
 
         if (triggers > 0)
         {
