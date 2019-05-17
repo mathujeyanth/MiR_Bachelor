@@ -31,16 +31,17 @@ def b_lidar_callback(data):
 def lidarToZones(data):
     hits = np.zeros(len(data))
 
-    overlap = 13
+    lidarMax = 2
+    overlap = 10
     zones = 8
     for x in range(0,541):
 
         lidarRange = data[x]
 
-        if lidarRange > 2 or lidarRange < 0.01:
+        if lidarRange > lidarMax+safetyDistances[x] or lidarRange < 0.01:
             hits[x]=1
         else:
-            hits[x]=round(((lidarRange-safetyDistances[x])/2),2)
+            hits[x]=round(((lidarRange-safetyDistances[x])/lidarMax),3)
 
     lidarInput = np.ones(zones)
 
@@ -167,7 +168,7 @@ def move():
     # output to file
     #f = open('recording.txt','w')
     #Tensorflow stuff
-    pred=predictor.Predictions("MiR_Robot_LBrain3.pb")
+    pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
     global safetyDistances
     vinkelB = 30.83
@@ -189,7 +190,7 @@ def move():
     b_laserScan_sub = rospy.Subscriber("/b_raw_scan", LaserScan, b_lidar_callback)  ## len(data.ranges)
     f_laserScan_sub = rospy.Subscriber("/f_raw_scan", LaserScan, f_lidar_callback)
 
-    rate = rospy.Rate(2)
+    rate = rospy.Rate(5)
     rate.sleep()
 
     velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
@@ -238,7 +239,7 @@ def move():
 
             
 
-            input_array = ([round(linear_speed,2),round(angular_speed,2), round((angle_dif/pi),2),round(d1/maxDeviation,2)])            
+            input_array = ([round(linear_speed,3),round(angular_speed,3), round((angle_dif/pi),3),round(d1/maxDeviation,3)])            
             input_array.extend(f_lidar.tolist())
             input_array.extend(b_lidar.tolist())
 
@@ -254,16 +255,16 @@ def move():
             
             #input_tensor.clear()
 
-            input_tensor = np.array([time_frame_1,time_frame_2]) # ,time_frame_3,time_frame_4,time_frame_5
+            input_tensor = np.array([time_frame_2,time_frame_1]) # ,time_frame_3,time_frame_4,time_frame_5
             input_tensor = input_tensor.flatten()
 
             output_tensor = np.array([0,0])
             eps = np.array([0.2,0.2])
             output_tensor = pred.getPrediction([eps], [input_tensor])
 
-            linear_vel = output_tensor[0][1] * 0.8
+            linear_vel = output_tensor[0][1] 
             if linear_vel < 0:
-                linear_vel = linear_vel * (1/3)
+                linear_vel = linear_vel
             angular_vel = output_tensor[0][0]
             
 
@@ -273,8 +274,8 @@ def move():
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel > 0:
                 linear_vel = sqrt(1-(angular_vel**2))
 
-            print("Input array")
-            print(input_array)
+            #print("Input array")
+            #print(input_array)
             #print("Angle dif")
             #print(angle_dif)
 
@@ -286,6 +287,7 @@ def move():
             vel_msg.angular.y = 0
             vel_msg.angular.z = angular_vel
             velocity_publisher.publish(vel_msg)
+            print(vel_msg)
         else:
             #f.close()
             vel_msg.linear.x = 0
