@@ -31,16 +31,17 @@ def b_lidar_callback(data):
 def lidarToZones(data):
     hits = np.zeros(len(data))
 
-    overlap = 13
+    lidarMax = 2
+    overlap = 10
     zones = 8
     for x in range(0,541):
 
         lidarRange = data[x]
 
-        if lidarRange > 2 or lidarRange < 0.01:
+        if lidarRange > lidarMax+safetyDistances[x] or lidarRange < 0.01:
             hits[x]=1
         else:
-            hits[x]=round(((lidarRange-safetyDistances[x])/2),2)
+            hits[x]=round(((lidarRange-safetyDistances[x])/lidarMax),3)
 
     lidarInput = np.ones(zones)
 
@@ -167,7 +168,7 @@ def move():
     # output to file
     #f = open('recording.txt','w')
     #Tensorflow stuff
-    pred=predictor.Predictions("MiR_Robot_LBrain3.pb")
+    pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
     global safetyDistances
     vinkelB = 30.83
@@ -254,7 +255,7 @@ def move():
             time_frame_2 = time_frame_1
             time_frame_1 = input_array
 
-            input_tensor = np.array([time_frame_1,time_frame_2]) # ,time_frame_3,time_frame_4,time_frame_5
+            input_tensor = np.array([time_frame_2,time_frame_1]) # ,time_frame_3,time_frame_4,time_frame_5
             input_tensor = input_tensor.flatten()
 
             output_tensor = np.array([0,0])
@@ -299,6 +300,7 @@ def move():
             vel_msg.angular.y = 0
             vel_msg.angular.z = virtualAngularVel
             velocity_publisher.publish(vel_msg)
+            print(vel_msg)
         else:
             #f.close()
             vel_msg.linear.x = 0
