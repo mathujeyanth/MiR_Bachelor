@@ -37,10 +37,10 @@ def lidarToZones(data):
 
         lidarRange = data[x]
 
-        if lidarRange > 5 or lidarRange < 0.01:
+        if lidarRange > 2 or lidarRange < 0.01:
             hits[x]=1
         else:
-            hits[x]=round(((lidarRange-safetyDistances[x])/5),2)
+            hits[x]=round(((lidarRange-safetyDistances[x])/2),2)
 
     lidarInput = np.ones(zones)
 
