@@ -22,7 +22,7 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
 
     public TextAsset[] paths;
 
-    public bool[] spawnStaticObs;
+    public bool[] SpawnObstacles;
 
     private int addCol = 0;
 
@@ -127,7 +127,7 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
             agents.transform.parent = agent.transform;
             agents.SendMessage("ReadCSVFile", paths[mapNumber]);
 
-            if (spawnStaticObs[mapNumber])
+            if (SpawnObstacles[mapNumber])
                 agents.SendMessage("SpawnStaticObsFunc");
         }
     }
