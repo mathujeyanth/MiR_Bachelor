@@ -136,25 +136,21 @@ MonoBehaviour:
     resetOnDone: 1
     onDemandDecision: 0
     numberOfActionsBetweenDecisions: 2
-  laserDist: 2
-  useVectorObs: 1
   displayLidar: 0
   displayPath: 0
-  EnableMaxDiv: 1
+  laserDist: 5
+  EnableMaxDevi: 1
+  maxDeviation: 3
   EnableUncertainty: 1
-  testAgent: 0
-  linearMaxAcceleration: 0.5
-  angularMaxAcceleration: 0.5
-  linearVelocityLimit: 1.5
-  linearReverseVelocityLimit: 0.5
+  linearMaxAcceleration: 1.5
+  angularMaxAcceleration: 2
+  linearVelocityLimit: 0.8
+  linearReverseVelocityLimit: 0.2
   angularVelocityLimit: 1
+  testAgent: 0
   obstacles:
   - {fileID: 1957236204450972, guid: 1b026525ce4829449a83d852e8af0d45, type: 2}
   - {fileID: 1987856056444826, guid: bcc2fa35c0d833c41b94089da5b775e2, type: 2}
-  - {fileID: 1858610326741750, guid: b4e5c94f8c98c10409c8a12b5da54ec4, type: 2}
-  - {fileID: 1957236204450972, guid: 1b026525ce4829449a83d852e8af0d45, type: 2}
-  - {fileID: 1359361133710236, guid: be0db35f7dfb1f64a945659bc13743b0, type: 2}
-  - {fileID: 1359361133710236, guid: be0db35f7dfb1f64a945659bc13743b0, type: 2}
 --- !u!212 &212383208807123170
 SpriteRenderer:
   m_ObjectHideFlags: 1
