@@ -31,9 +31,10 @@ def b_lidar_callback(data):
 def lidarToZones(data):
     hits = np.zeros(len(data))
 
-    lidarMax = 2
+    lidarMax = 5
     overlap = 10
     zones = 8
+
     for x in range(0,541):
 
         lidarRange = data[x]
@@ -202,7 +203,17 @@ def move():
     vel_msg = Twist()
 
     #Variabler
-    maxDeviation = 2.0
+    maxDeviation = 3.0
+
+    maxLinearVel = 1.1
+    maxReverseVel = 0.3
+
+    maxAngularVel = 1
+
+    simLinearVel = 0.8
+    simReverseVel = 0.2
+    
+
     #Receiveing the user's input
     #print("Let's move your robot")
 
@@ -221,13 +232,6 @@ def move():
     # time_frame_5 = np.zeros(20)
     # time_frame_5.tolist()
 
-    virtualLinearVel = 0
-    virtualAngularVel = 0
-    targetLinear = 0
-    targetAngular = 0
-    linearMaxAcceleration = 0.5
-    angularMaxAcceleration = 0.5
-
 
     key = bool(input("Start?"))
 
@@ -243,9 +247,13 @@ def move():
             elif angle_dif < -pi:
                 angle_dif = angle_dif + 2 * pi
 
-            
+            if linear_speed > 0:
+                linear_speed = (linear_speed * (maxLinearVel/simLinearVel))
+            else:
+                linear_speed = (linear_speed * (maxReverseVel/simReverseVel))
 
-            input_array = ([round(virtualLinearVel,2),round(virtualAngularVel,2), round((angle_dif/pi),2),round(d1/maxDeviation,2)])            
+            input_array = ([round(linear_speed,3),round(angular_speed,3), round((angle_dif/pi),3),round(d1/maxDeviation,3)])   
+            
             input_array.extend(f_lidar.tolist())
             input_array.extend(b_lidar.tolist())
 
@@ -263,29 +271,22 @@ def move():
             output_tensor = pred.getPrediction([eps], [input_tensor])
 
             linear_vel = output_tensor[0][1]
+
             angular_vel = output_tensor[0][0]
 
             if abs(angular_vel) < 0.1:
                 angular_vel = 0
 
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel > 0:
-                linear_vel = sqrt(1-(angular_vel**2))
+                linear_vel = sqrt(1-angular_vel**2)
 
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
-                linear_vel = -sqrt(1-(angular_vel**2))
+                linear_vel = -1*sqrt(1-angular_vel**2)
 
-            targetLinear = linear_vel
-            targetAngular = angular_vel
-
-            if targetLinear < virtualLinearVel:
-                virtualLinearVel -= linearMaxAcceleration*timeStep
+            if linear_vel > 0:
+                linear_vel = linear_vel * (simLinearVel/maxLinearVel)
             else:
-                virtualLinearVel += linearMaxAcceleration*timeStep
-
-            if targetAngular < virtualAngularVel:
-                virtualAngularVel -= angularMaxAcceleration*timeStep
-            else:
-                virtualAngularVel += angularMaxAcceleration*timeStep
+                linear_vel = linear_vel * (simReverseVel/maxReverseVel)
 
             print("Input array")
             print(input_array)
@@ -293,12 +294,12 @@ def move():
             #print(angle_dif)
 
 
-            vel_msg.linear.x = virtualLinearVel
+            vel_msg.linear.x = linear_vel
             vel_msg.linear.y = 0
             vel_msg.linear.z = 0
             vel_msg.angular.x = 0
             vel_msg.angular.y = 0
-            vel_msg.angular.z = virtualAngularVel
+            vel_msg.angular.z = angular_vel
             velocity_publisher.publish(vel_msg)
             print(vel_msg)
         else:

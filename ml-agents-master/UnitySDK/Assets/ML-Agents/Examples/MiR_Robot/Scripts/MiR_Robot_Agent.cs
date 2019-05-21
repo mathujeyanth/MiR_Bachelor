@@ -246,8 +246,8 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < zones; i++)
             {
-                lidarInput[i] = Mathf.Round(100*lidarInput[i]);
-                lidarInput[i] /= 100*laserDist;
+                lidarInput[i] = Mathf.Round(20*lidarInput[i]);
+                lidarInput[i] /= 20*laserDist;
             }
             //Debug.Log("Front = " + String.Join(" ",
             // new List<float>(lidarInput)
@@ -318,8 +318,8 @@ public class MiR_Robot_Agent : Agent
 
             for (int i = 0; i < zones; i++)
             {
-                lidarInput[i] = Mathf.Round(100 * lidarInput[i]);
-                lidarInput[i] /= 100 * laserDist;
+                lidarInput[i] = Mathf.Round(20 * lidarInput[i]);
+                lidarInput[i] /= 20 * laserDist;
             }
 
             AddVectorObs(lidarInput);
