@@ -141,11 +141,11 @@ MonoBehaviour:
   laserDist: 2
   EnableMaxDevi: 1
   maxDeviation: 2
-  EnableUncertainty: 0
+  EnableUncertainty: 1
   linearMaxAcceleration: 1.5
   angularMaxAcceleration: 2
-  linearVelocityLimit: 0.8
-  linearReverseVelocityLimit: 0.2
+  linearVelocityLimit: 1.1
+  linearReverseVelocityLimit: 0.275
   angularVelocityLimit: 1
   testAgent: 0
   obstacles:
