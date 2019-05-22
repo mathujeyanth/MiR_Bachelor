@@ -201,7 +201,6 @@ def move():
     #Tensorflow stuff
     pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
-<<<<<<< HEAD
     global FrontSafetyDistances
     global BackSafetyDistances
 
@@ -225,7 +224,7 @@ def move():
     degreesPrLaser = 240.0/(541-1)
     for i in range(0,541):
         vinkelB = (i * degreesPrLaser) + 30.96
-=======
+
     global safetyDistances
     vinkelB = 30.83
     lengthB = 0.6
@@ -234,9 +233,10 @@ def move():
     degreesPrLaser = 270.0/(541-1)
     for i in range(0,541):
         vinkelB = (i * degreesPrLaser) + 30.83
->>>>>>> EndGame
+
         if vinkelB > 180.0:
             vinkelB = 180.0 - (vinkelB - 180.0)
+
         BackSafetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
 
     # Starts a new node
@@ -343,12 +343,12 @@ def move():
             #print(angle_dif)
 
 
-            vel_msg.linear.x = 0
+            vel_msg.linear.x = linear_vel
             vel_msg.linear.y = 0
             vel_msg.linear.z = 0
             vel_msg.angular.x = 0
             vel_msg.angular.y = 0
-            vel_msg.angular.z = 0
+            vel_msg.angular.z = angular_vel
             velocity_publisher.publish(vel_msg)
             #print(vel_msg)
         else:
