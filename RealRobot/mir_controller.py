@@ -279,10 +279,6 @@ def move():
 
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel > 0:
                 linear_vel = sqrt(1-angular_vel**2)
-
-            if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
-                linear_vel = -1*sqrt(1-angular_vel**2)
-
             
             linear_vel = linear_vel * (simLinearVel/maxLinearVel)
             
