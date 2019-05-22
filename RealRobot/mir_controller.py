@@ -296,7 +296,7 @@ def move():
             linear_speed = (linear_speed * (maxLinearVel/simLinearVel))
             angular_speed = angular_speed * (1/maxAngularVel)
 
-            input_array = ([round(linear_speed,2),round(angular_speed,2), round((angle_dif/pi),2),round(d1/maxDeviation,2)])   
+            input_array = ([round(linear_speed,2),round(angular_speed,2), -1*round((angle_dif/pi),2),round(d1/maxDeviation,2)])   
             
             input_array.extend(f_lidar.tolist())
             input_array.extend(b_lidar.tolist())
@@ -321,6 +321,9 @@ def move():
 
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel > 0:
                 linear_vel = sqrt(1-angular_vel**2)
+
+            if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
+                linear_vel = -1*sqrt(1-angular_vel**2)
             
             linear_vel = linear_vel * (simLinearVel/maxLinearVel)
             
@@ -338,7 +341,7 @@ def move():
             vel_msg.linear.z = 0
             vel_msg.angular.x = 0
             vel_msg.angular.y = 0
-            vel_msg.angular.z = angular_vel
+            vel_msg.angular.z = -1*angular_vel
             velocity_publisher.publish(vel_msg)
             #print(vel_msg)
         else:
