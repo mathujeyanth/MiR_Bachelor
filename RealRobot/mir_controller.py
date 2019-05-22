@@ -31,18 +31,18 @@ def b_lidar_callback(data):
 def lidarToZones(data):
     hits = np.zeros(len(data))
 
-    lidarMax = 5
-    overlap = 10
+    lidarMax = 2
+    overlap = 15
     zones = 8
 
     for x in range(0,541):
 
         lidarRange = data[x]
 
-        if lidarRange > lidarMax+safetyDistances[x] or lidarRange < 0.01:
+        if lidarRange > (lidarMax+safetyDistances[x]) or lidarRange < 0.1:
             hits[x]=1
         else:
-            hits[x]=round(((lidarRange-safetyDistances[x])/lidarMax),3)
+            hits[x]=round(((lidarRange-safetyDistances[x])*20))/(lidarMax*20)
 
     lidarInput = np.ones(zones)
 
@@ -69,28 +69,21 @@ def path_callback(data):
     global x_pose
     global y_pose
     global path_length
-    running = False
-    path_index = 0
-    length_a = len(data.poses)
-    path_length = length_a
-    if length_a > 0:
-        #print("New path")
-        
-        running = True
-        glo_path = np.zeros((2,length_a))
-        for x in reversed(range(0,length_a)): #reversed(
-            glo_path[0,x] = data.poses[x].pose.position.x
-            glo_path[1,x] = data.poses[x].pose.position.y
-        #np.flip(glo_path,0)
-        #print(glo_path)
-        #index = 0
-        #while glo_path[0,0] == glo_path[0,index] or glo_path[1,0] == glo_path[1,index]:
-        #    index +=1
-        #path_index = index
-        #v1 = np.array([glo_path[0,0],glo_path[1,0]])
-        #v2 = np.array([glo_path[0,index],glo_path[1,index]])
-        #v3 = v1 - v2
-        #simple = np.array([0,1])
+    if running == False:
+        path_index = 0
+        length_a = len(data.poses)
+        path_length = length_a
+        if length_a > 0:
+            #print("New path")
+            running = True
+            glo_path = np.zeros((2,length_a))
+            for x in reversed(range(0,length_a)): #reversed(
+                glo_path[0,x] = data.poses[x].pose.position.x
+                glo_path[1,x] = data.poses[x].pose.position.y
+
+            #print(glo_path)
+                
+
 
 def robot_pose_callback(data):
     #print(data.position)
@@ -172,13 +165,13 @@ def move():
     pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
     global safetyDistances
-    vinkelB = 30.83
-    lengthB = 0.6
-    lengthC = 0.4576
+    vinkelB = 30.8
+    lengthB = 0.65
+    lengthC = 0.46
     safetyDistances = np.zeros(541)
     degreesPrLaser = 270.0/(541-1)
     for i in range(0,541):
-        vinkelB = (i * degreesPrLaser) + 30.83
+        vinkelB = (i * degreesPrLaser) + 30.8
         if vinkelB > 180.0:
             vinkelB = 180.0 - (vinkelB - 180.0)
         safetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
@@ -188,10 +181,10 @@ def move():
     rospy.init_node('MiR_controller', anonymous=True)
 
     rospos_sub = rospy.Subscriber("/robot_pose",Pose,robot_pose_callback)
-    b_laserScan_sub = rospy.Subscriber("/b_raw_scan", LaserScan, b_lidar_callback)  ## len(data.ranges)
-    f_laserScan_sub = rospy.Subscriber("/f_raw_scan", LaserScan, f_lidar_callback)
+    b_laserScan_sub = rospy.Subscriber("/b_scan", LaserScan, b_lidar_callback)  ## len(data.ranges)
+    f_laserScan_sub = rospy.Subscriber("/f_scan", LaserScan, f_lidar_callback)
 
-    time = 5
+    time = 2.5
     timeStep = 1/time
     rate = rospy.Rate(time)
     rate.sleep()
@@ -203,7 +196,7 @@ def move():
     vel_msg = Twist()
 
     #Variabler
-    maxDeviation = 3.0
+    maxDeviation = 2.0
 
     maxLinearVel = 1.1
     maxReverseVel = 0.3
@@ -211,7 +204,7 @@ def move():
     maxAngularVel = 1
 
     simLinearVel = 0.8
-    simReverseVel = 0.2
+    simReverseVel = 0.20
     
 
     #Receiveing the user's input
@@ -232,7 +225,7 @@ def move():
     # time_frame_5 = np.zeros(20)
     # time_frame_5.tolist()
 
-
+    running = False
     key = bool(input("Start?"))
 
     while not rospy.is_shutdown():
@@ -247,12 +240,11 @@ def move():
             elif angle_dif < -pi:
                 angle_dif = angle_dif + 2 * pi
 
-            if linear_speed > 0:
-                linear_speed = (linear_speed * (maxLinearVel/simLinearVel))
-            else:
-                linear_speed = (linear_speed * (maxReverseVel/simReverseVel))
+           
+            linear_speed = (linear_speed * (maxLinearVel/simLinearVel))
+            angular_speed = angular_speed * (1/maxAngularVel)
 
-            input_array = ([round(linear_speed,3),round(angular_speed,3), round((angle_dif/pi),3),round(d1/maxDeviation,3)])   
+            input_array = ([round(linear_speed,2),round(angular_speed,2), round((angle_dif/pi),2),round(d1/maxDeviation,2)])   
             
             input_array.extend(f_lidar.tolist())
             input_array.extend(b_lidar.tolist())
@@ -263,30 +255,25 @@ def move():
             time_frame_2 = time_frame_1
             time_frame_1 = input_array
 
-            input_tensor = np.array([time_frame_2,time_frame_1]) # ,time_frame_3,time_frame_4,time_frame_5
+            input_tensor = np.array([time_frame_1,time_frame_2]) # ,time_frame_3,time_frame_4,time_frame_5
             input_tensor = input_tensor.flatten()
 
             output_tensor = np.array([0,0])
-            eps = np.array([0.1,0.1])
+            eps = np.array([0.2,0.2])
             output_tensor = pred.getPrediction([eps], [input_tensor])
 
             linear_vel = output_tensor[0][1]
 
-            angular_vel = output_tensor[0][0]
+            angular_vel = output_tensor[0][0] * maxAngularVel
 
-            if abs(angular_vel) < 0.1:
-                angular_vel = 0
 
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel > 0:
                 linear_vel = sqrt(1-angular_vel**2)
-
-            if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
-                linear_vel = -1*sqrt(1-angular_vel**2)
-
-            if linear_vel > 0:
-                linear_vel = linear_vel * (simLinearVel/maxLinearVel)
-            else:
-                linear_vel = linear_vel * (simReverseVel/maxReverseVel)
+            
+            linear_vel = linear_vel * (simLinearVel/maxLinearVel)
+            
+            if linear_vel < 0:
+                linear_vel = linear_vel * 0.25
 
             print("Input array")
             print(input_array)
