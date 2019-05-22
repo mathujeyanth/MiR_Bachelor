@@ -28,25 +28,26 @@ def b_lidar_callback(data):
     #print("B lidar")
     #print(b_lidar.tolist())
 
-def lidarToZones(data):
+def f_lidarToZones(data):
+    global FrontSafetyDistances
     hits = np.zeros(len(data))
 
     lidarMax = 2
-    overlap = 15
+    overlap = 13
     zones = 8
 
     for x in range(0,541):
 
         lidarRange = data[x]
 
-        if lidarRange > (lidarMax+safetyDistances[x]) or lidarRange < 0.1:
+        if lidarRange > (lidarMax+FrontSafetyDistances[x]) or lidarRange < 0.1:
             hits[x]=1
         else:
-            hits[x]=round(((lidarRange-safetyDistances[x])*20))/(lidarMax*20)
+            hits[x]=round(((lidarRange-FrontSafetyDistances[x])*20))/(lidarMax*20)
 
     lidarInput = np.ones(zones)
 
-    x_range = int(541/8+2*overlap)
+    x_range = int((541/8)+2*overlap)
 
     for x in range(0,x_range):
         if x<((541/zones)+overlap):
@@ -61,6 +62,42 @@ def lidarToZones(data):
                 lidarInput[y]=hits[int(x+((541/zones)*y)-overlap)]
 
     return lidarInput
+
+def b_lidarToZones(data):
+    global BackSafetyDistances
+    hits = np.zeros(len(data))
+
+    lidarMax = 2
+    overlap = 13
+    zones = 8
+
+    for x in range(0,541):
+
+        lidarRange = data[x]
+
+        if lidarRange > (lidarMax+BackSafetyDistances[x]) or lidarRange < 0.1:
+            hits[x]=1
+        else:
+            hits[x]=round(((lidarRange-BackSafetyDistances[x])*20))/(lidarMax*20)
+
+    lidarInput = np.ones(zones)
+
+    x_range = int((541/8)+2*overlap)
+
+    for x in range(0,x_range):
+        if x<((541/zones)+overlap):
+            if hits[x] < lidarInput[0]:
+                lidarInput[0] = hits[x]
+
+            if hits[int(x+((541/zones)*(zones-1)-overlap))]<lidarInput[zones-1]:
+                lidarInput[zones-1] = hits[int(x+((541/zones)*(zones-1)-overlap))]
+
+        for y in range(1,zones-1):
+            if hits[int(x+((541/zones)*y)-overlap)] < lidarInput[y]:
+                lidarInput[y]=hits[int(x+((541/zones)*y)-overlap)]
+
+    return lidarInput
+
 
 def path_callback(data):
     global glo_path
@@ -164,18 +201,32 @@ def move():
     #Tensorflow stuff
     pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
-    global safetyDistances
-    vinkelB = 30.8
-    lengthB = 0.65
-    lengthC = 0.46
-    safetyDistances = np.zeros(541)
-    degreesPrLaser = 270.0/(541-1)
+    global FrontSafetyDistances
+    global BackSafetyDistances
+
+    lengthB = 0.6
+
+    vinkelB = 30.7
+    lengthC = 0.4594
+
+    FrontSafetyDistances = np.zeros(541)
+    degreesPrLaser = 240.0/(541-1)
     for i in range(0,541):
-        vinkelB = (i * degreesPrLaser) + 30.8
+        vinkelB = (i * degreesPrLaser) + 30.7
         if vinkelB > 180.0:
             vinkelB = 180.0 - (vinkelB - 180.0)
-        safetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
-        #safetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+        FrontSafetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
+
+    vinkelB = 30.96
+    lengthC = 0.4558
+
+    BackSafetyDistances = np.zeros(541)
+    degreesPrLaser = 240.0/(541-1)
+    for i in range(0,541):
+        vinkelB = (i * degreesPrLaser) + 30.96
+        if vinkelB > 180.0:
+            vinkelB = 180.0 - (vinkelB - 180.0)
+        BackSafetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
 
     # Starts a new node
     rospy.init_node('MiR_controller', anonymous=True)
@@ -204,7 +255,7 @@ def move():
     maxAngularVel = 1
 
     simLinearVel = 0.8
-    simReverseVel = 0.20
+    simReverseVel = 0.2
     
 
     #Receiveing the user's input
