@@ -283,10 +283,11 @@ def move():
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
                 linear_vel = -1*sqrt(1-angular_vel**2)
 
-            if linear_vel > 0:
-                linear_vel = linear_vel * (simLinearVel/maxLinearVel)
-            else:
-                linear_vel = linear_vel * (simReverseVel/maxReverseVel)
+            
+            linear_vel = linear_vel * (simLinearVel/maxLinearVel)
+            
+            if linear_vel < 0:
+                linear_vel = linear_vel * 0.25
 
             print("Input array")
             print(input_array)
