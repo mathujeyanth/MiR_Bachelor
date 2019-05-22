@@ -17,14 +17,14 @@ def odom_callback(data):
 
 def f_lidar_callback(data):
     global f_lidar
-    f_lidar = lidarToZones(np.flip(data.ranges))
+    f_lidar = f_lidarToZones(np.flip(data.ranges))
     #print("F lidar")
     #print(f_lidar.tolist())
 
 
 def b_lidar_callback(data):
     global b_lidar
-    b_lidar = lidarToZones(np.flip(data.ranges))
+    b_lidar = b_lidarToZones(np.flip(data.ranges))
     #print("B lidar")
     #print(b_lidar.tolist())
 
@@ -212,7 +212,7 @@ def move():
     FrontSafetyDistances = np.zeros(541)
     degreesPrLaser = 240.0/(541-1)
     for i in range(0,541):
-        vinkelB = (i * degreesPrLaser) + 30.7
+        vinkelB = (i * degreesPrLaser) + 30.7 + 10
         if vinkelB > 180.0:
             vinkelB = 180.0 - (vinkelB - 180.0)
         FrontSafetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
@@ -223,21 +223,11 @@ def move():
     BackSafetyDistances = np.zeros(541)
     degreesPrLaser = 240.0/(541-1)
     for i in range(0,541):
-        vinkelB = (i * degreesPrLaser) + 30.96
-
-    global safetyDistances
-    vinkelB = 30.83
-    lengthB = 0.6
-    lengthC = 0.457
-    safetyDistances = np.zeros(541)
-    degreesPrLaser = 270.0/(541-1)
-    for i in range(0,541):
-        vinkelB = (i * degreesPrLaser) + 30.83
-
+        vinkelB = (i * degreesPrLaser) + 30.96 + 20
         if vinkelB > 180.0:
             vinkelB = 180.0 - (vinkelB - 180.0)
-
         BackSafetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
+        
 
     # Starts a new node
     rospy.init_node('MiR_controller', anonymous=True)
