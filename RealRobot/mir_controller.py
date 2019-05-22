@@ -201,6 +201,7 @@ def move():
     #Tensorflow stuff
     pred=predictor.Predictions("MiR_Robot_LBrain.pb")
     # calc safety distances
+<<<<<<< HEAD
     global FrontSafetyDistances
     global BackSafetyDistances
 
@@ -224,6 +225,16 @@ def move():
     degreesPrLaser = 240.0/(541-1)
     for i in range(0,541):
         vinkelB = (i * degreesPrLaser) + 30.96
+=======
+    global safetyDistances
+    vinkelB = 30.83
+    lengthB = 0.6
+    lengthC = 0.457
+    safetyDistances = np.zeros(541)
+    degreesPrLaser = 270.0/(541-1)
+    for i in range(0,541):
+        vinkelB = (i * degreesPrLaser) + 30.83
+>>>>>>> EndGame
         if vinkelB > 180.0:
             vinkelB = 180.0 - (vinkelB - 180.0)
         BackSafetyDistances[i] = lengthC * cos(np.deg2rad(vinkelB)) + sqrt(lengthB**2+lengthC**2 * cos(np.deg2rad(vinkelB))**2 - lengthC**2)
@@ -235,7 +246,7 @@ def move():
     b_laserScan_sub = rospy.Subscriber("/b_scan", LaserScan, b_lidar_callback)  ## len(data.ranges)
     f_laserScan_sub = rospy.Subscriber("/f_scan", LaserScan, f_lidar_callback)
 
-    time = 2.5
+    time = 5
     timeStep = 1/time
     rate = rospy.Rate(time)
     rate.sleep()
@@ -282,7 +293,7 @@ def move():
     while not rospy.is_shutdown():
         rate.sleep()
 
-        if running:
+        if running: 
             update_rob_pos()
 
             angle_dif = (angle - robot_angle)
@@ -326,20 +337,20 @@ def move():
             if linear_vel < 0:
                 linear_vel = linear_vel * 0.25
 
-            print("Input array")
+            #print("Input array")
             print(input_array)
             #print("Angle dif")
             #print(angle_dif)
 
 
-            vel_msg.linear.x = linear_vel
+            vel_msg.linear.x = 0
             vel_msg.linear.y = 0
             vel_msg.linear.z = 0
             vel_msg.angular.x = 0
             vel_msg.angular.y = 0
-            vel_msg.angular.z = angular_vel
+            vel_msg.angular.z = 0
             velocity_publisher.publish(vel_msg)
-            print(vel_msg)
+            #print(vel_msg)
         else:
             #f.close()
             vel_msg.linear.x = 0
