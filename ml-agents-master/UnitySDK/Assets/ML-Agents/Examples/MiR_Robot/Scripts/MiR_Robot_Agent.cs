@@ -176,16 +176,16 @@ public class MiR_Robot_Agent : Agent
     {
         if (useVectorObs)
         {
-            float[] vectorting = new float[20];
+            //float[] vectorting = new float[20];
             AddVectorObs( roundDec(virtualLinearVelocity/linearVelocityLimit,2) );
-            vectorting[0] = roundDec(virtualLinearVelocity / linearVelocityLimit, 2);
+            //vectorting[0] = roundDec(virtualLinearVelocity / linearVelocityLimit, 2);
             AddVectorObs( roundDec(virtualAngularVelocity,2));
-            vectorting[1] = roundDec(virtualAngularVelocity, 2);
+            //vectorting[1] = roundDec(virtualAngularVelocity, 2);
             AddVectorObs( roundDec(getTargetAngle(currentPos)/180.0f,2) );
-            vectorting[2] = roundDec(getTargetAngle(currentPos) / 180.0f, 2);
+            //vectorting[2] = roundDec(getTargetAngle(currentPos) / 180.0f, 2);
             float dist = Vector2.Distance(agentRB.transform.localPosition, path[pathIdx]);
             AddVectorObs( roundDec(dist / maxDeviation,2));
-            vectorting[3] = roundDec(dist / maxDeviation, 2);
+            //vectorting[3] = roundDec(dist / maxDeviation, 2);
             float randomVal = 0.0f;
             // front lidar
 
@@ -254,7 +254,7 @@ public class MiR_Robot_Agent : Agent
             {
                 lidarInput[i] = Mathf.Round(20*lidarInput[i]);
                 lidarInput[i] /= 20*laserDist;
-                vectorting[4 + i] = lidarInput[i];
+                //vectorting[4 + i] = lidarInput[i];
             }
             //Debug.Log("Front = " + String.Join(" ",
             // new List<float>(lidarInput)
@@ -327,18 +327,18 @@ public class MiR_Robot_Agent : Agent
             {
                 lidarInput[i] = Mathf.Round(20 * lidarInput[i]);
                 lidarInput[i] /= 20 * laserDist;
-                vectorting[12 + i] = lidarInput[i];
+                //vectorting[12 + i] = lidarInput[i];
             }
 
             AddVectorObs(lidarInput);
-            string outputFile = String.Join(" ",
-            new List<float>(vectorting)
-            .ConvertAll(i => i.ToString())
-            .ToArray());
-            outputFile += '\n';
+            //string outputFile = String.Join(" ",
+            //new List<float>(vectorting)
+            //.ConvertAll(i => i.ToString())
+            //.ToArray());
+            //outputFile += '\n';
 
-            File.AppendAllText("inputFile.txt", outputFile);
-            Debug.Log(outputFile);
+            //File.AppendAllText("inputFile.txt", outputFile);
+            //Debug.Log(outputFile);
 
             if (testAgent)
             {
