@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 212207363010966990}
   - component: {fileID: 58933521965144448}
   m_Layer: 9
-  m_Name: CircleObs
+  m_Name: circleObs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
