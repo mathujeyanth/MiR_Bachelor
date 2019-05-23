@@ -239,7 +239,7 @@ def move():
     f_laserScan_sub = rospy.Subscriber("/f_scan", LaserScan, f_lidar_callback)
 
     # Setup a timer and sleep for 1 time step
-    time = 5
+    time = 20
     timeStep = 1/time
     rate = rospy.Rate(time)
     rate.sleep()
@@ -260,14 +260,35 @@ def move():
 
     maxAngularVel = 1
 
-    simLinearVel = 1.1
-    simReverseVel = 0.275
+    simLinearVel = 0.8
+    simReverseVel = 0.2
     
     # Stacked vectors and timeframes
     stackedVectors = 10
     inputSize = 20
 
-    time_frames = np.zeros((stackedVectors,inputSize))
+    #time_frames = np.zeros((stackedVectors,inputSize))
+    time_frame_1 = np.zeros(20)
+    time_frame_1.tolist()
+    time_frame_2 = np.zeros(20)
+    time_frame_2.tolist()
+    time_frame_3 = np.zeros(20)
+    time_frame_3.tolist()
+    time_frame_4 = np.zeros(20)
+    time_frame_4.tolist()
+    time_frame_5 = np.zeros(20)
+    time_frame_5.tolist()
+    time_frame_6 = np.zeros(20)
+    time_frame_6.tolist()
+    time_frame_7 = np.zeros(20)
+    time_frame_7.tolist()
+    time_frame_8 = np.zeros(20)
+    time_frame_8.tolist()
+    time_frame_9 = np.zeros(20)
+    time_frame_9.tolist()
+    time_frame_10 = np.zeros(20)
+    time_frame_10.tolist()
+
 
     # Start?
     running = False
@@ -296,23 +317,38 @@ def move():
             angular_speed = angular_speed * (1/maxAngularVel)
 
             # First 4 inputs - linear velocity, angular velocity, angular diffrence to waypoint and deviation from path
-            input_array = ([round(linear_speed,2),-1*round(angular_speed,2), -1*round((angle_dif/pi),2),round(d1/maxDeviation,2)])   
+            input_array = ([round(linear_speed,2),round(angular_speed,2), -1*round((angle_dif/pi),2),round(d1/maxDeviation,2)])   
             
             # Add front LIDAR and rear LIDAR to the input array
             input_array.extend(f_lidar.tolist())
             input_array.extend(b_lidar.tolist())
 
+            time_frame_10 = time_frame_9
+            time_frame_9 = time_frame_8
+            time_frame_8 = time_frame_7
+            time_frame_7 = time_frame_6
+            time_frame_6 = time_frame_5
+            time_frame_5 = time_frame_4
+            time_frame_4 = time_frame_3
+            time_frame_3 = time_frame_2
+            time_frame_2 = time_frame_1
+            time_frame_1 = input_array
+
+            inputT = np.array([time_frame_1,time_frame_2,time_frame_3,time_frame_4,time_frame_5,time_frame_6,time_frame_7,time_frame_8,time_frame_9,time_frame_10])
+
             # Update timeframes
-            for x in range(stackedVector,1):
-                time_frames[x] = time_frames[x-1]
+            #for x in range((stackedVectors-1),0,-1):
+            #    time_frames[x] = time_frames[x-1]
 
             # Add new timeframe
-            time_frames[0] = input_array
+            #time_frames[0] = input_array
+
+            #print(time_frames)
 
             # Setup input for model
-            input_tensor = time_frames.flatten()
+            input_tensor = inputT.flatten()
             output_tensor = np.array([0,0])
-            eps = np.array([0.1,0.1])
+            eps = np.array([0.2,0.2])
 
             # Run data through model
             output_tensor = pred.getPrediction([eps], [input_tensor])
@@ -325,8 +361,8 @@ def move():
             if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel > 0:
                 linear_vel = sqrt(1-angular_vel**2)
 
-            if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
-                linear_vel = -1*sqrt(1-angular_vel**2)
+            #if sqrt(linear_vel**2+angular_vel**2) > 1 and linear_vel < 0:
+            #    linear_vel = -1*sqrt(1-angular_vel**2)
             
             linear_vel = linear_vel * (simLinearVel/maxLinearVel)
             
@@ -334,7 +370,7 @@ def move():
                 linear_vel = linear_vel * 0.25
 
             # Print input array
-            print(input_array)
+            #print(input_array)
 
             # Publish data to robot via cmd_vel
             vel_msg.linear.x = linear_vel
@@ -347,9 +383,9 @@ def move():
             #print(vel_msg)
         else:
             # Reset time_frames
-            if isReset == False:
-                time_frames = np.zeros((stackedVectors,inputSize))
-                isReset = True
+            #if isReset == False:
+            #    time_frames = np.zeros((stackedVectors,inputSize))
+            #    isReset = True
 
             # Publish a stop command
             vel_msg.linear.x = 0
