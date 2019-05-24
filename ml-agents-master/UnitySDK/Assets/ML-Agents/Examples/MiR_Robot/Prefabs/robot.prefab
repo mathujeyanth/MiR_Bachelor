@@ -79,7 +79,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.6
+  m_Radius: 0.7
 --- !u!61 &61884956691848002
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -138,7 +138,7 @@ MonoBehaviour:
     numberOfActionsBetweenDecisions: 2
   displayLidar: 0
   displayPath: 0
-  laserDist: 2
+  laserDist: 5
   EnableMaxDevi: 1
   maxDeviation: 2
   EnableUncertainty: 1
@@ -150,7 +150,13 @@ MonoBehaviour:
   testAgent: 0
   obstacles:
   - {fileID: 1957236204450972, guid: 1b026525ce4829449a83d852e8af0d45, type: 2}
+  - {fileID: 1957236204450972, guid: 1b026525ce4829449a83d852e8af0d45, type: 2}
   - {fileID: 1987856056444826, guid: bcc2fa35c0d833c41b94089da5b775e2, type: 2}
+  - {fileID: 1987856056444826, guid: bcc2fa35c0d833c41b94089da5b775e2, type: 2}
+  - {fileID: 1858610326741750, guid: b4e5c94f8c98c10409c8a12b5da54ec4, type: 2}
+  - {fileID: 1858610326741750, guid: b4e5c94f8c98c10409c8a12b5da54ec4, type: 2}
+  - {fileID: 1359361133710236, guid: be0db35f7dfb1f64a945659bc13743b0, type: 2}
+  - {fileID: 1359361133710236, guid: be0db35f7dfb1f64a945659bc13743b0, type: 2}
 --- !u!212 &212383208807123170
 SpriteRenderer:
   m_ObjectHideFlags: 1

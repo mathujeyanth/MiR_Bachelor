@@ -604,8 +604,8 @@ public class MiR_Robot_Agent : Agent
                 randomAng = (float)((rnd.NextDouble()*2 - 1));
                 randomPos = (float)((rnd.NextDouble() * 2 - 1));
 
-                if (path.Length > 81)
-                    randomIndex = rnd.Next(40, path.Length - 40);
+                if (path.Length > 121)
+                    randomIndex = rnd.Next(60, path.Length - 60);
                 else
                     randomIndex = path.Length / 2;
 
