@@ -3,7 +3,7 @@ default:
     batch_size: 2048
     beta: 5.0e-3
     buffer_size: 20480
-    epsilon: 0.1
+    epsilon: 0.2
     gamma: 0.99
     hidden_units: 256
     lambd: 0.95

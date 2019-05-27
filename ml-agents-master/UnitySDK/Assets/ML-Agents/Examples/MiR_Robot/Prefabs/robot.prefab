@@ -79,7 +79,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.7
+  m_Radius: 0.6
 --- !u!61 &61884956691848002
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -136,9 +136,9 @@ MonoBehaviour:
     resetOnDone: 1
     onDemandDecision: 0
     numberOfActionsBetweenDecisions: 2
-  displayLidar: 0
-  displayPath: 0
-  laserDist: 5
+  displayLidar: 1
+  displayPath: 1
+  laserDist: 2
   EnableMaxDevi: 1
   maxDeviation: 2
   EnableUncertainty: 1

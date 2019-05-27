@@ -239,7 +239,7 @@ def move():
     f_laserScan_sub = rospy.Subscriber("/f_scan", LaserScan, f_lidar_callback)
 
     # Setup a timer and sleep for 1 time step
-    time = 20
+    time = 5
     timeStep = 1/time
     rate = rospy.Rate(time)
     rate.sleep()
@@ -297,10 +297,12 @@ def move():
 
     while not rospy.is_shutdown():
         # Sleep for the time step
-        rate.sleep()
+        if rate.sleep():
+            print("On time")
 
         # Check if it is running
         if running: 
+            rate.reset()
             isReset = False
             # Update robot state
             update_rob_pos()
@@ -382,12 +384,7 @@ def move():
             velocity_publisher.publish(vel_msg)
             #print(vel_msg)
         else:
-            # Reset time_frames
-            #if isReset == False:
-            #    time_frames = np.zeros((stackedVectors,inputSize))
-            #    isReset = True
-
-            # Publish a stop command
+            rate.reset()
             vel_msg.linear.x = 0
             vel_msg.linear.y = 0
             vel_msg.linear.z = 0
