@@ -71,8 +71,6 @@ public class MiR_Robot_Agent : Agent
 
     private int descionFreq;
 
-    private int triggers = 0;
-
     private float virtualLinearVelocity = 0;
     private float virtualAngularVelocity = 0;
 
@@ -87,6 +85,8 @@ public class MiR_Robot_Agent : Agent
 
     private bool SpawnStaticObs = false;
     private bool useVectorObs = true;
+
+    private bool triggered = false;
     
     private GameObject[] spawnedObs;
 
@@ -252,12 +252,11 @@ public class MiR_Robot_Agent : Agent
             {
                 lidarInput[i] = Mathf.Round(20*lidarInput[i]);
                 lidarInput[i] /= 20*laserDist;
-                //vectorting[4 + i] = lidarInput[i];
+
+                if (lidarInput[i] <= 0)
+                    triggered = true;
             }
-            //Debug.Log("Front = " + String.Join(" ",
-            // new List<float>(lidarInput)
-            // .ConvertAll(i => i.ToString())
-            // .ToArray()));
+
 
             AddVectorObs(lidarInput);
 
@@ -325,6 +324,9 @@ public class MiR_Robot_Agent : Agent
             {
                 lidarInput[i] = Mathf.Round(20 * lidarInput[i]);
                 lidarInput[i] /= 20 * laserDist;
+
+                if (lidarInput[i] <= 0)
+                    triggered = true;
                 //vectorting[12 + i] = lidarInput[i];
             }
 
@@ -462,9 +464,10 @@ public class MiR_Robot_Agent : Agent
 
         reward += -0.001f * descionFreq;
 
-        if (triggers > 0)
+        if (triggered)
         {
-            reward += -0.005f * descionFreq;
+            reward += -0.0075f * descionFreq;
+            triggered = false;
         }
 
         if (pathIdx > path.Length - 41)
@@ -602,10 +605,10 @@ public class MiR_Robot_Agent : Agent
             for (int i = 0; i<obstacles.Length;i++)
             {
                 randomAng = (float)((rnd.NextDouble()*2 - 1));
-                randomPos = (float)((rnd.NextDouble() * 2 - 1));
+                randomPos = (float)((rnd.NextDouble() * 2 - 1))*2;
 
-                if (path.Length > 121)
-                    randomIndex = rnd.Next(60, path.Length - 60);
+                if (path.Length > 201)
+                    randomIndex = rnd.Next(100, path.Length - 100);
                 else
                     randomIndex = path.Length / 2;
 
@@ -628,8 +631,6 @@ public class MiR_Robot_Agent : Agent
         virtualAngularVelocity = 0.0f;
         targetVertical = 0.0f;
         targetHoizontal = 0.0f;
-
-        triggers = 0;
     }
 
     void OnCollisionEnter2D(Collision2D col)
@@ -638,17 +639,6 @@ public class MiR_Robot_Agent : Agent
         AddReward(-1f);
         //Done();
     }
-
-    void OnTriggerEnter2D(Collider2D col) // OnTriggerEnter2D
-    {
-        triggers++;
-    }
-    
-    void OnTriggerExit2D(Collider2D col)
-    {
-        triggers--;
-    }
-
 
     float getTargetAngle(Vector2 point)
     {
