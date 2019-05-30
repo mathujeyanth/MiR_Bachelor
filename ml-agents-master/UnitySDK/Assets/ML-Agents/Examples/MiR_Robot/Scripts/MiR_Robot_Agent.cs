@@ -7,6 +7,7 @@ using System;
 
 public class MiR_Robot_Agent : Agent
 {
+    
     // Public parameters
     [Space(10)]
     [Header("Display")]
@@ -31,12 +32,12 @@ public class MiR_Robot_Agent : Agent
     public float linearVelocityLimit = 1.5f;
     public float linearReverseVelocityLimit = 0.5f;
     public float angularVelocityLimit = 1.0f;
-    [Space(10)]
-    [Header("Output test results")]
-    public bool testAgent = false;
-    [Space(10)]
-    [Header("Spawnable obstacles")]
-    public GameObject[] obstacles;
+    //[Space(10)]
+    //[Header("Output test results")]
+    private bool testAgent = false;
+    //[Space(10)]
+    //[Header("Spawnable obstacles")]
+    private GameObject[] obstacles;
 
 
     // Private parameters
@@ -51,8 +52,8 @@ public class MiR_Robot_Agent : Agent
     private Vector2 simpleVec;
     private const int lasers = nLaser;
     private float[] hitDistances = new float[nLaser];
-    private float[] FrontsafetyDistances = new float[nLaser];
-    private float[] BacksafetyDistances = new float[nLaser];
+    //private float[] FrontsafetyDistances = new float[nLaser];
+    //private float[] BacksafetyDistances = new float[nLaser];
 
     //private const int bitMask = 1 << 9;
     private const int frontStart = -170;
@@ -67,7 +68,7 @@ public class MiR_Robot_Agent : Agent
     private float targetHoizontal = 0;
     private float targetVertical = 0;
 
-    private float drag = 0.95f;
+    //private float timer = 0.00f;
 
     private int descionFreq;
 
@@ -81,12 +82,13 @@ public class MiR_Robot_Agent : Agent
     private RaycastHit2D hit;
 
     private Rigidbody2D agentRB;
-    private CircleCollider2D safetyZone;
+    //private CircleCollider2D safetyZone;
+    private CapsuleCollider2D newSafetyZone;
 
     private bool SpawnStaticObs = false;
     private bool useVectorObs = true;
 
-    private bool triggered = false;
+    //private bool triggered = false;
     
     private GameObject[] spawnedObs;
 
@@ -117,7 +119,10 @@ public class MiR_Robot_Agent : Agent
     public override void InitializeAgent()
     {
         base.InitializeAgent();
-        safetyZone = GetComponent<CircleCollider2D>();
+
+        //safetyZone = GetComponent<CircleCollider2D>();
+        newSafetyZone = GetComponent<CapsuleCollider2D>();
+
         agentRB = GetComponent<Rigidbody2D>();
         simpleVec = new Vector2(0f, 1f);
 
@@ -134,37 +139,40 @@ public class MiR_Robot_Agent : Agent
             }
         }
 
-        float lengthB = safetyZone.radius;
-        float vinkelB = 30.7f;
-        float lengthC = 0.4594f;
-        for (int i = 0;i<nLaser;i++)
-        {
-            vinkelB = (i * degreesPrLaser) + 30.7f + 10;
+        //float lengthB = safetyZone.radius;
+        //float vinkelB = 30.7f;
+        //float lengthC = 0.4594f;
 
-            if (vinkelB > 180.0f)
-            {
-                vinkelB = 180.0f - (vinkelB - 180.0f);
-            }
+        //for (int i = 0;i<nLaser;i++)
+        //{
+        //    vinkelB = (i * degreesPrLaser) + 30.96f + 10;
 
-            FrontsafetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+        //    if (vinkelB > 180.0f)
+        //    {
+        //        vinkelB = 180.0f - (vinkelB - 180.0f);
+        //    }
 
-        }
+        //    FrontsafetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+        //}
 
-        vinkelB = 30.96f;
-        lengthC = 0.4558f;
+        
 
-        for (int i = 0; i < nLaser; i++)
-        {
-            vinkelB = (i * degreesPrLaser) + 30.96f + 20;
+        //lengthB = 0.6f;
+        //vinkelB = 30.96f;
+        //lengthC = 0.4558f;
 
-            if (vinkelB > 180.0f)
-            {
-                vinkelB = 180.0f - (vinkelB - 180.0f);
-            }
+        //for (int i = 0; i < nLaser; i++)
+        //{
+        //    vinkelB = (i * degreesPrLaser) + 30.96f + 20;
 
-            BacksafetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+        //    if (vinkelB > 180.0f)
+        //    {
+        //        vinkelB = 180.0f - (vinkelB - 180.0f);
+        //    }
 
-        }
+        //    BacksafetyDistances[i] = lengthC * Mathf.Cos(vinkelB * Mathf.Deg2Rad) + Mathf.Sqrt(Mathf.Pow(lengthB, 2) + Mathf.Pow(lengthC, 2) * Mathf.Pow(Mathf.Cos(vinkelB * Mathf.Deg2Rad), 2) - Mathf.Pow(lengthC, 2));
+
+        //}
 
         descionFreq = agentParameters.numberOfActionsBetweenDecisions;
     }
@@ -195,33 +203,34 @@ public class MiR_Robot_Agent : Agent
             for (int i = 0; i < nLaser; i++)
             {
                 if (EnableUncertainty)
-                    randomVal = (float)((rnd.NextDouble()+rnd.NextDouble()-1)*0.1);
+                    randomVal =  (float)(rnd.NextDouble() - rnd.NextDouble())*0.1f;//NextGaussian() * 0.05f;
 
                 hit = Physics2D.Raycast(agentRB.transform.position+offset, (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
-                if (displayLidar && hit)
+                if (displayLidar && hit) //  
                 {
-                    Debug.DrawRay(agentRB.transform.position+offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
-                    Debug.DrawRay(agentRB.transform.position+offset, FrontsafetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
-                }
 
+                    UnityEngine.Debug.DrawRay(agentRB.transform.position+offset, hit.distance * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
+                    //UnityEngine.Debug.DrawRay(agentRB.transform.position+offset, FrontsafetyDistances[i] * (new Vector2(Mathf.Sin(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos(((frontStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                }
+                
                 if (testAgent && hit)
                 {
                     if (minValAvUs > hit.distance)
                         minValAvUs = hit.distance;
 
-                    if (minValAvMs > hit.distance - FrontsafetyDistances[i])
-                        minValAvMs = hit.distance - FrontsafetyDistances[i];
+                    //if (minValAvMs > hit.distance - FrontsafetyDistances[i])
+                    //    minValAvMs = hit.distance - FrontsafetyDistances[i];
 
                     if (minUS > hit.distance)
                         minUS = hit.distance;
 
-                    if (minMS > hit.distance - FrontsafetyDistances[i])
-                        minMS = hit.distance - FrontsafetyDistances[i];
+                    //if (minMS > hit.distance - FrontsafetyDistances[i])
+                    //    minMS = hit.distance - FrontsafetyDistances[i];
                 }
 
                 if (hit)
-                    hitDistances[i] = hit.distance - FrontsafetyDistances[i] + randomVal;
+                    hitDistances[i] = hit.distance + randomVal; // - FrontsafetyDistances[i]
                 else
                     hitDistances[i] = laserDist;
             }
@@ -253,12 +262,19 @@ public class MiR_Robot_Agent : Agent
                 lidarInput[i] = Mathf.Round(20*lidarInput[i]);
                 lidarInput[i] /= 20*laserDist;
 
-                if (lidarInput[i] <= 0)
-                    triggered = true;
+                //if (lidarInput[i] <= 0)
+                //    triggered = true;
             }
 
 
             AddVectorObs(lidarInput);
+
+            //string outputFile = String.Join(" ",
+            //new List<float>(lidarInput)
+            //.ConvertAll(i => i.ToString())
+            //.ToArray());
+            //outputFile += '\n';
+            //File.AppendAllText("frontLidar.txt", outputFile);
 
             // Rear lidar
 
@@ -267,14 +283,14 @@ public class MiR_Robot_Agent : Agent
             for (int i = 0; i < nLaser; i++)
             {
                 if (EnableUncertainty)
-                    randomVal = (float)((rnd.NextDouble() + rnd.NextDouble() - 1) * 0.1);
+                    randomVal =  (float)(rnd.NextDouble() - rnd.NextDouble()) * 0.1f; //NextGaussian() * 0.05f;
 
                 hit = Physics2D.Raycast(agentRB.transform.position + offset, (new Vector2(Mathf.Sin(((backStart + (i * degreesPrLaser)) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), laserDist); // , bitMask
 
                 if (displayLidar && hit)
                 {
-                    Debug.DrawRay(agentRB.transform.position + offset, hit.distance * (new Vector2(Mathf.Sin((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
-                    Debug.DrawRay(agentRB.transform.position + offset, BacksafetyDistances[i] * (new Vector2(Mathf.Sin((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
+                    UnityEngine.Debug.DrawRay(agentRB.transform.position + offset, hit.distance * (new Vector2(Mathf.Sin((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.blue);
+                    //UnityEngine.Debug.DrawRay(agentRB.transform.position + offset, BacksafetyDistances[i] * (new Vector2(Mathf.Sin((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad), Mathf.Cos((backStart + (i * degreesPrLaser) - agentRB.rotation) * Mathf.Deg2Rad))), Color.red);
                 }
 
                 if (testAgent && hit)
@@ -282,18 +298,18 @@ public class MiR_Robot_Agent : Agent
                     if (minValAvUs > hit.distance)
                         minValAvUs = hit.distance;
 
-                    if (minValAvMs > hit.distance - BacksafetyDistances[i])
-                        minValAvMs = hit.distance - BacksafetyDistances[i];
+                    //if (minValAvMs > hit.distance - BacksafetyDistances[i])
+                    //    minValAvMs = hit.distance - BacksafetyDistances[i];
 
                     if (minUS > hit.distance)
                         minUS = hit.distance;
 
-                    if (minMS > hit.distance - BacksafetyDistances[i])
-                        minMS = hit.distance - BacksafetyDistances[i];
+                    //if (minMS > hit.distance - BacksafetyDistances[i])
+                    //    minMS = hit.distance - BacksafetyDistances[i];
                 }
 
                 if (hit)
-                    hitDistances[i] = hit.distance - BacksafetyDistances[i] + randomVal;
+                    hitDistances[i] = hit.distance + randomVal;// - BacksafetyDistances[i]
                 else
                     hitDistances[i] = laserDist;
             }
@@ -325,20 +341,19 @@ public class MiR_Robot_Agent : Agent
                 lidarInput[i] = Mathf.Round(20 * lidarInput[i]);
                 lidarInput[i] /= 20 * laserDist;
 
-                if (lidarInput[i] <= 0)
-                    triggered = true;
+                //if (lidarInput[i] <= 0)
+                //    triggered = true;
                 //vectorting[12 + i] = lidarInput[i];
             }
 
             AddVectorObs(lidarInput);
-            //string outputFile = String.Join(" ",
-            //new List<float>(vectorting)
+
+            //outputFile = String.Join(" ",
+            //new List<float>(lidarInput)
             //.ConvertAll(i => i.ToString())
             //.ToArray());
             //outputFile += '\n';
-
-            //File.AppendAllText("inputFile.txt", outputFile);
-            //Debug.Log(outputFile);
+            //File.AppendAllText("backLidar.txt", outputFile);
 
             if (testAgent)
             {
@@ -356,7 +371,7 @@ public class MiR_Robot_Agent : Agent
         {
             for (int i = pathIdx; i < path.Length - 1; i++)
             {
-                Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.green);
+                UnityEngine.Debug.DrawLine((Vector2)transform.parent.position + path[i], (Vector2)transform.parent.position + path[i + 1], Color.green);
             }
         }
         
@@ -364,48 +379,43 @@ public class MiR_Robot_Agent : Agent
 
     void FixedUpdate()
     {
-
         targetVertical = TimeFrameP0[0];
         targetHoizontal = TimeFrameP0[1];
- 
+
+        //if (timer < 1)
+        //    targetVertical = 0;
+        //if (timer > 1)
+        //    targetVertical = -0.2f;
+        //if (timer > 3)
+        //    targetVertical = 0;
+
+        //timer += 0.1f;
+
+        if (virtualLinearVelocity < targetVertical)
+            virtualLinearVelocity += linearMaxAcceleration * 0.1f;
             
+        if (virtualLinearVelocity > targetVertical)
+            virtualLinearVelocity -= linearMaxAcceleration * 0.1f;
 
-        if (targetVertical != 0)
-        {
-            if (virtualLinearVelocity < targetVertical)
-                virtualLinearVelocity += linearMaxAcceleration * 0.1f;
-            
-            if (virtualLinearVelocity > targetVertical)
-                virtualLinearVelocity -= linearMaxAcceleration * 0.1f;
+        if (virtualLinearVelocity > targetVertical-(linearMaxAcceleration * 0.1f) && virtualLinearVelocity < targetVertical+(linearMaxAcceleration * 0.1f))
+            virtualLinearVelocity = targetVertical;
 
-            if (virtualLinearVelocity > targetVertical-(linearMaxAcceleration * 0.1f) && virtualLinearVelocity < targetVertical+(linearMaxAcceleration * 0.1f))
-                virtualLinearVelocity = targetVertical;
-        }
-        else
-        {
-            // Drag
-            virtualLinearVelocity = virtualLinearVelocity * drag;
-        }
+        if (virtualAngularVelocity < targetHoizontal)
+            virtualAngularVelocity += angularMaxAcceleration * 0.1f;
 
-        if (targetHoizontal != 0)
-        {
-            if (virtualAngularVelocity < targetHoizontal)
-                virtualAngularVelocity += angularMaxAcceleration * 0.1f;
+        if (virtualAngularVelocity > targetHoizontal)
+            virtualAngularVelocity -= angularMaxAcceleration * 0.1f;
 
-            if (virtualAngularVelocity > targetHoizontal)
-                virtualAngularVelocity -= angularMaxAcceleration * 0.1f;
+        if (virtualAngularVelocity > targetHoizontal - (angularMaxAcceleration * 0.1f) && virtualAngularVelocity < targetHoizontal + (angularMaxAcceleration * 0.1f))
+            virtualAngularVelocity = targetHoizontal;
 
-            if (virtualAngularVelocity > targetHoizontal - (angularMaxAcceleration * 0.1f) && virtualAngularVelocity < targetHoizontal + (angularMaxAcceleration * 0.1f))
-                virtualAngularVelocity = targetHoizontal;
-        }
-        else
-        {
-            // Drag
-            virtualAngularVelocity = virtualAngularVelocity * drag;
-        }
+        //string outputFile = virtualLinearVelocity.ToString();
+        //File.AppendAllText("speed.txt", outputFile);
+        //File.AppendAllText("speed.txt", " ");
 
         // Set velocities
         agentRB.angularVelocity = virtualAngularVelocity * -Mathf.Rad2Deg;
+        
 
         agentRB.velocity = new Vector2
         (
@@ -464,11 +474,14 @@ public class MiR_Robot_Agent : Agent
 
         reward += -0.001f * descionFreq;
 
-        if (triggered)
-        {
+        if (newSafetyZone.IsTouchingLayers())
             reward += -0.0075f * descionFreq;
-            triggered = false;
-        }
+
+        //if (triggered)
+        //{
+        //    reward += -0.0075f * descionFreq;
+        //    triggered = false;
+        //}
 
         if (pathIdx > path.Length - 41)
             currentPos = path[path.Length - 1];
@@ -508,7 +521,7 @@ public class MiR_Robot_Agent : Agent
             averageDiv = averageDiv + distToIndex;
         }
 
-        if (distanceToGoal < safetyZone.radius)
+        if (distanceToGoal < 0.5f)
         {
             reward += 1f;
             AddReward(reward);
@@ -587,7 +600,7 @@ public class MiR_Robot_Agent : Agent
             path = pathArray[pathNr];
             for (int i =0;i<36;i++)
             {
-                hit = Physics2D.Raycast((Vector2)transform.parent.position + path[0], (new Vector2(Mathf.Sin((i * 10) * Mathf.Deg2Rad), Mathf.Cos((i * 10) * Mathf.Deg2Rad))), safetyZone.radius+0.1f);
+                hit = Physics2D.Raycast((Vector2)transform.parent.position + path[0], (new Vector2(Mathf.Sin((i * 10) * Mathf.Deg2Rad), Mathf.Cos((i * 10) * Mathf.Deg2Rad))), 0.6f);
                 if (hit)
                 {
                     break;
@@ -604,7 +617,7 @@ public class MiR_Robot_Agent : Agent
             Vector2 pos;
             for (int i = 0; i<obstacles.Length;i++)
             {
-                randomAng = (float)((rnd.NextDouble()*2 - 1));
+                randomAng = (float)((rnd.NextDouble() * 2 - 1));
                 randomPos = (float)((rnd.NextDouble() * 2 - 1))*2;
 
                 if (path.Length > 201)
@@ -698,18 +711,35 @@ public class MiR_Robot_Agent : Agent
         return (float)Math.Round(x_d,y);
     }
 
-    void SpawnStaticObsFunc()
+    float NextGaussian()
     {
-        SpawnStaticObs = true;
-
-        spawnedObs = new GameObject[obstacles.Length];
-        GameObject obs = new GameObject("Obstacles");
-        for (int i = 0; i < obstacles.Length; i++)
+        float v1, v2, s;
+        do
         {
-            Vector3 position = new Vector3(0, 0);
-            GameObject tempObs = Instantiate(obstacles[i], position, Quaternion.identity) as GameObject;
-            tempObs.transform.parent = obs.transform;
-            spawnedObs[i] = tempObs;
+            v1 = 2.0f * UnityEngine.Random.Range(0f, 1f) - 1.0f;
+            v2 = 2.0f * UnityEngine.Random.Range(0f, 1f) - 1.0f;
+            s = v1 * v1 + v2 * v2;
+        } while (s >= 1.0f || s == 0f);
+        s = Mathf.Sqrt((-2.0f * Mathf.Log(s)) / s);
+        return v1 * s;
+    }
+
+    void SpawnStaticObsFunc(GameObject[] listOfObstacles)
+    {
+        if (listOfObstacles.Length != 0)
+        {
+            SpawnStaticObs = true;
+            obstacles = listOfObstacles;
+            spawnedObs = new GameObject[obstacles.Length];
+            GameObject obs = new GameObject("Obstacles");
+
+            for (int i = 0; i < obstacles.Length; i++)
+            {
+                Vector3 position = new Vector3(0, 0);
+                GameObject tempObs = Instantiate(obstacles[i], position, Quaternion.identity) as GameObject;
+                tempObs.transform.parent = obs.transform;
+                spawnedObs[i] = tempObs;
+            }
         }
     }
 

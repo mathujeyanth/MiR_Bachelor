@@ -4,6 +4,13 @@ using UnityEngine;
 
 //[ExecuteInEditMode]
 
+[System.Serializable]
+public class obstacleLists
+{
+    public GameObject[] obstacles;
+}
+
+
 public class MiR_Robot_StackedMap : MonoBehaviour {
 
     public enum TileType
@@ -22,11 +29,11 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
 
     public TextAsset[] paths;
 
-    public bool[] SpawnObstacles;
+    public obstacleLists[] obstacleLists;
 
     private int addCol = 0;
 
-    private GameObject mapObj;
+    private GameObject mapObj;  
 
     private int columns;
     private int rows;
@@ -126,9 +133,7 @@ public class MiR_Robot_StackedMap : MonoBehaviour {
             GameObject agents = Instantiate(Agents, position, Quaternion.identity) as GameObject;
             agents.transform.parent = agent.transform;
             agents.SendMessage("ReadCSVFile", paths[mapNumber]);
-
-            if (SpawnObstacles[mapNumber])
-                agents.SendMessage("SpawnStaticObsFunc");
+            agents.SendMessage("SpawnStaticObsFunc", obstacleLists[mapNumber].obstacles);
         }
     }
 }
