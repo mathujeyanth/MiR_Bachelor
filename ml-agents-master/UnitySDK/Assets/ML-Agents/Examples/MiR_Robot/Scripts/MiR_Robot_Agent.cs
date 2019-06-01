@@ -15,9 +15,9 @@ public class MiR_Robot_Agent : Agent
     public bool displayPath = false;
     [Header("LIDAR")]
     public float laserDist = 2;
-    public const int nLaser = 40;
+    public const int nLaser = 90;
     public const int overlap = 1;
-    public const int zones = 8;
+    public const int zones = 15;
     [Space(10)]
     [Header("Deviation")]
     public bool EnableMaxDevi = true;
@@ -56,9 +56,9 @@ public class MiR_Robot_Agent : Agent
     //private float[] BacksafetyDistances = new float[nLaser];
 
     //private const int bitMask = 1 << 9;
-    private const int frontStart = -170;
-    private const int backStart = 20;
-    private const int totalDegrees = 240;
+    private const int frontStart = -180;
+    private const int backStart = 0;
+    private const int totalDegrees = 270;
     private const float degreesPrLaser = totalDegrees / (nLaser-1);
     private const float radians = Mathf.PI / 180;
 
@@ -467,21 +467,13 @@ public class MiR_Robot_Agent : Agent
         }
 
         if (EnableMaxDevi && distToIndex > maxDeviation) //Meters it may deviate from path
-        {
-            //Done();
-            reward += -0.0005f * descionFreq;
-        }
+            reward += -0.001f * descionFreq;
+
 
         reward += -0.001f * descionFreq;
 
         if (newSafetyZone.IsTouchingLayers())
-            reward += -0.0075f * descionFreq;
-
-        //if (triggered)
-        //{
-        //    reward += -0.0075f * descionFreq;
-        //    triggered = false;
-        //}
+            reward += -0.01f * descionFreq;
 
         if (pathIdx > path.Length - 41)
             currentPos = path[path.Length - 1];
@@ -709,19 +701,6 @@ public class MiR_Robot_Agent : Agent
     {
         double x_d = x;
         return (float)Math.Round(x_d,y);
-    }
-
-    float NextGaussian()
-    {
-        float v1, v2, s;
-        do
-        {
-            v1 = 2.0f * UnityEngine.Random.Range(0f, 1f) - 1.0f;
-            v2 = 2.0f * UnityEngine.Random.Range(0f, 1f) - 1.0f;
-            s = v1 * v1 + v2 * v2;
-        } while (s >= 1.0f || s == 0f);
-        s = Mathf.Sqrt((-2.0f * Mathf.Log(s)) / s);
-        return v1 * s;
     }
 
     void SpawnStaticObsFunc(GameObject[] listOfObstacles)

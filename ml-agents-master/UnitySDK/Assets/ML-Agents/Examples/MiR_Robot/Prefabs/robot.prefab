@@ -138,7 +138,7 @@ MonoBehaviour:
     numberOfActionsBetweenDecisions: 2
   displayLidar: 0
   displayPath: 0
-  laserDist: 3
+  laserDist: 2
   EnableMaxDevi: 1
   maxDeviation: 2
   EnableUncertainty: 1
